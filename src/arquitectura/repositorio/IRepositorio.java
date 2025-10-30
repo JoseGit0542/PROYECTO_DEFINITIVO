@@ -1,7 +1,4 @@
-package repositorio;
-
-import java.util.List;
-import java.util.Optional;
+package arquitectura.repositorio;
 
 public interface IRepositorio<T, ID> {
     /**
@@ -21,7 +18,7 @@ public interface IRepositorio<T, ID> {
     void deleteById(ID id);
 
     /**
-     * Borra todas las entidades del repositorio.
+     * Borra todas las entidades del arquitectura.repositorio.
      */
     void deleteAll();
 

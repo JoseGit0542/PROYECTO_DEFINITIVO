@@ -1,4 +1,4 @@
-package dominio;
+package arquitectura.dominio;
 
 public class Videojuego {
 
