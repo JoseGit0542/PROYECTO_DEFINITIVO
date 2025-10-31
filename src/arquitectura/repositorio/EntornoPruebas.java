@@ -11,83 +11,72 @@ public class EntornoPruebas {
 
         //aqui haremos las pruebas de las funcionalidades que vayamos implementando
         Scanner reader = new Scanner(System.in);
-        boolean estado = true;
 
 
         //creo el repositorio
         RepositorioVideojuego repo = new RepositorioVideojuego();
 
+        //variables de las respuestas
+        int respuesta1 = 0;
+        int respuesta2 = 0;
+        int respuesta3 = 0;
+        boolean estado = true;
+        boolean estado2 = true;
+
+
+
 
         //hago videojuegos en un bucle y los introduzco en el hashmap
         do {
-            System.out.println("1: Crear un videojuego | 2: Salir ");
-            int respuesta = reader.nextInt();
-            reader.nextLine();
+            try {
+                Menus.menu1();
+                respuesta1 = reader.nextInt();
+                reader.nextLine();
 
-            switch(respuesta) {
-                case 1:
+                //estructura switch para que el usuario elija
+                switch(respuesta1) {
+                    case 1:
+                        Menus.menuGestion();
+                        respuesta2 = reader.nextInt();
+                        reader.nextLine();
 
-                    try {
-                        //llamo a la funcion pa que no sea un lio en el main
-                        crearVideojuego(reader, repo);
+                        //abro el segundo switch para el segundo menu
+                        switch(respuesta2) {
+                            case 1:
+                                do{
+                                    System.out.println("1: Crear videojuego | 2: salir |");
+                                    respuesta3 = reader.nextInt();
+                                    switch(respuesta3) {
+                                        
+                                    }
 
-                    }catch(Exception e) {
-                        e.printStackTrace();
-                    }
-                    break;
+                                    Funciones.crearVideojuego(reader, repo);
 
-                case 2:
-                    estado = false;
-                    System.out.println("Saliendo...");
 
-                    //muestro la lista
-                    System.out.println("Su biblioteca es la siguiente: ");
-                    for (Videojuego v : repo.getLista().values()) {
-                        System.out.println(v);
-                    }
+                                }while(estado2);
 
-                    break;
-                default:
-                    System.out.println("Debes de introducir un valor valido.");
 
+                                break;
+                            case 2:
+                                break;
+                            case 3:
+                                break;
+                            case 4:
+                                break;
+                            case 5:
+                                break;
+                            default:
+                                System.out.println("Introduce un valor correcto");
+
+                        }
+
+
+                }
+
+            }catch(InputMismatchException e) {
+                System.out.println("Debes de introducir un valor correcto.");
+                reader.next();
             }
-
-
         }while(estado);
-
-        //despues los muestro para comprobar que todo funciona correctamente
-
-    }
-    public static void crearVideojuego(Scanner reader, RepositorioVideojuego repo) {
-        //le pido al usuario que introduzca los datos
-        try {
-            System.out.println("Introduce el título del videojuego: ");
-            String titulo = reader.nextLine();
-
-
-            System.out.println("Introduce la categoria del videojuego: ");
-            String categoria = reader.nextLine();
-
-
-            System.out.println("Introduce la plataforma: ");
-            String plataforma = reader.nextLine();
-
-
-            System.out.println("Introduce el año en que se lanzo: ");
-            int año = reader.nextInt();
-            reader.nextLine();
-
-            Videojuego v = new Videojuego(titulo, categoria, plataforma, año);
-
-            //añado a la lista el videojuego
-            repo.getLista().put(RepositorioVideojuego.generarId(), v);
-
-
-        }catch(InputMismatchException e) {
-            System.out.println("Introduce el tipo correcto");
-        }
-
-
-
     }
 }
