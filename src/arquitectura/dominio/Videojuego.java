@@ -1,5 +1,7 @@
 package arquitectura.dominio;
 
+import arquitectura.repositorio.RepositorioVideojuego;
+
 public class Videojuego {
 
     //le damos los atributos a videojuego
@@ -10,9 +12,6 @@ public class Videojuego {
     private int año;
 
     //Setters
-    public void setId(int id) {
-        this.id = id;
-    }
     public  void setTitulo(String titulo) {
         this.titulo = titulo;
     }
@@ -44,8 +43,8 @@ public class Videojuego {
     }
 
     //Constructor con todos los parametros
-    public Videojuego(int id, String titulo, String categoria, String plataforma, int año) {
-        this.id = id;
+    public Videojuego(String titulo, String categoria, String plataforma, int año) {
+        this.id = RepositorioVideojuego.generarId();
         this.titulo = titulo;
         this.categoria = categoria;
         this.plataforma = plataforma;
@@ -53,13 +52,19 @@ public class Videojuego {
     }
 
     //constructor con id y titulo
-    public Videojuego(int id, String titulo) {
-        this.id = id;
+    public Videojuego(String titulo) {
+        this.id = RepositorioVideojuego.generarId();
         this.titulo = titulo;
         this.categoria = null;
         this.plataforma = null;
         this.año = 0;
     }
+
+    //metodo toString para mostrar los videojuegos
+    public String toString() {
+    return "Id: " + this.id + ", título: " + this.titulo + ", categoria: " + this.categoria + ", plataforma: " + this.plataforma + ", año: " + this.año;
+    }
+
 
 
 
