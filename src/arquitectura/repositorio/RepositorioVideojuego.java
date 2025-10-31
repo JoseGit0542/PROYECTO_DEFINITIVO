@@ -2,10 +2,7 @@ package arquitectura.repositorio;
 
 import arquitectura.dominio.Videojuego;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 public class RepositorioVideojuego implements IRepositorioExtend<Videojuego,  Integer> {
 
@@ -61,27 +58,62 @@ public class RepositorioVideojuego implements IRepositorioExtend<Videojuego,  In
      */
     @Override
     public boolean existsById(Integer integer) {
-        return false;
+        if(integer == null){
+            throw new IllegalArgumentException("el id no debe de ser nulo");
+        }
+        return true;
     }
-
+    /**
+     * Devuelve la entidad T con identificador id.
+     * @param id    Identificador de la entidad
+     * @return      Entidad que tiene como identificador id.
+     *
+     * @throws IllegalArgumentException En caso de ser id nulo
+     */
     @Override
     public Videojuego findById(Integer integer) {
-        return null;
+        if (integer == null){
+            throw new IllegalArgumentException("el id no debe de ser nulo");
+        }
+        return lista.get(integer);
     }
-
+    /**
+     * Devuelve la entidad T con identificador id.
+     *
+     * @param id    Identificador de la entidad
+     * @return      Entidad que tiene como identificador id u Optional#empty() si no se encuentra
+     *
+     * @throws IllegalArgumentException En caso de ser id nulo
+     */
     @Override
     public Optional<Videojuego> findByIdOptional(Integer integer) {
+        if(integer == null){
+            throw new IllegalArgumentException("el id no debe de ser nulo");
+        }
         return Optional.empty();
     }
-
+    /**
+     * Devuelve todas las instancias
+     * @return  Todas las instancias
+     */
     @Override
     public List<Videojuego> findAll() {
-        return null;
+        return new ArrayList<>(lista.values());
     }
-
+    /**
+     *
+     * Guarda la entidad entity.
+     * @param entity    entidad a guar dar. No debe ser nulo
+     * @return          entidad guardada
+     *
+     * @throws IllegalArgumentException En caso de ser entity nulo
+     */
     @Override
     public <S extends Videojuego> S save(S entity) {
-        return null;
+        if(entity == null){
+            throw new IllegalArgumentException("entity no debe de ser nulo");
+        }
+        return entity;
     }
 
     //clase para generar los ides de los videojuegos
