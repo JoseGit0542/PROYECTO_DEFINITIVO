@@ -23,6 +23,9 @@ public class Main {
     }
     public static void menuMostrar() {
         System.out.println("-----MOSTRAR BIBLIOTECA-----");
-        System.out.println("1: ");
+        System.out.println("1: Mostrar lista de videojuegos");
+        System.out.println("2: Mostrar cantidad de videojuegos");
+        System.out.println("3: Mostrar videojuego con su nombre e identificador");
+        System.out.println("4: Atrás");
     }
 }

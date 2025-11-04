@@ -65,7 +65,7 @@ public class RepositorioVideojuego implements IRepositorioExtend<Videojuego,  In
     }
     /**
      * Devuelve la entidad T con identificador id.
-     * @param id    Identificador de la entidad
+     * @param integer  Identificador de la entidad
      * @return      Entidad que tiene como identificador id.
      *
      * @throws IllegalArgumentException En caso de ser id nulo
@@ -80,7 +80,7 @@ public class RepositorioVideojuego implements IRepositorioExtend<Videojuego,  In
     /**
      * Devuelve la entidad T con identificador id.
      *
-     * @param id    Identificador de la entidad
+     * @param integer    Identificador de la entidad
      * @return      Entidad que tiene como identificador id u Optional#empty() si no se encuentra
      *
      * @throws IllegalArgumentException En caso de ser id nulo
@@ -113,6 +113,8 @@ public class RepositorioVideojuego implements IRepositorioExtend<Videojuego,  In
         if(entity == null){
             throw new IllegalArgumentException("entity no debe de ser nulo");
         }
+        int id = generarId();
+        lista.put(id, entity);
         return entity;
     }
 
