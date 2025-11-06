@@ -24,6 +24,9 @@ public class Videojuego {
     public void setAño(int año) {
         this.año = año;
     }
+    public void setId(int id) {
+        this.id = id;
+    }
 
     //getters
     public int getId() {

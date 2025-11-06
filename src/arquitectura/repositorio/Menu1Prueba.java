@@ -2,78 +2,103 @@ package arquitectura.repositorio;
 
 import arquitectura.dominio.Videojuego;
 
-import java.util.InputMismatchException;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.Scanner;
 
+import static java.lang.Integer.parseInt;
+
 public class Menu1Prueba {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
 
-        Scanner sc = new Scanner(System.in);
-
+        Scanner reader = new Scanner(System.in);
         RepositorioVideojuego rp = new RepositorioVideojuego();
-        Videojuego vd = new Videojuego("God of war", "hack & slash", "PLayStation", 2018);
-        rp.save(vd);
-        Videojuego vd2 = new Videojuego("BattleField 6", "Shooter", "Pc/PlayStation/Xbox", 2025);
-        rp.save(vd2);
 
         int opcion = 0;
-        do {
+        String[] lista;
 
+        do {
             try {
                 System.out.println("");
                 Menus.menuMostrar();
-                opcion = sc.nextInt();
+                opcion = reader.nextInt();
+                reader.nextLine(); // limpiar buffer
+
+                File archivo = new File("archivo.txt");
+
                 switch (opcion) {
-                    case 1:
-                        System.out.println("Tu biblioteca es la siguiente: \n");
-                        for (int key : rp.getLista().keySet()) {
-                            System.out.println("Id: " + rp.getLista().get(key).getId() + " título: " + rp.getLista().get(key).getTitulo() + ", categoría: " + rp.getLista().get(key).getCategoria() +
-                                    ", plataforma: " + rp.getLista().get(key).getPlataforma() + ", año: " + rp.getLista().get(key).getAño());
+                    case 1: {
+                        BufferedReader br = new BufferedReader(new FileReader(archivo));
+                        String lineaLeida;
+                        while ((lineaLeida = br.readLine()) != null) {
+                            System.out.println(lineaLeida);
                         }
+                        br.close();
                         break;
+                    }
 
-                    case 2:
-                        long contador = rp.count();
-                        System.out.println("Tamaño de la biblioteca: " + contador);
-                        break;
-
-                    case 3:
-                        System.out.println("Lista de IDS: ");
-                        for(int key : rp.getLista().keySet()) {
-                            System.out.print("[ " + rp.getLista().get(key).getId() + " ], ");
+                    case 2: {
+                        BufferedReader br = new BufferedReader(new FileReader(archivo));
+                        int contador = 0;
+                        while (br.readLine() != null) {
+                            contador++;
                         }
-                        System.out.println("\n");
-                        System.out.println("introduce el id del juego que quieres mostrar: ");
+                        br.close();
+                        System.out.println("Tienes " + contador + " juegos");
+                        break;
+                    }
 
+                    case 3: {
+                        System.out.println("Tu biblioteca es la siguiente: ");
+                        BufferedReader br = new BufferedReader(new FileReader(archivo));
 
-                        int id = sc.nextInt();
-                        sc.nextLine();
+                        String linea;
+                        // Mostramos los IDs y nombres
+                        while ((linea = br.readLine()) != null) {
+                            lista = linea.split(",");
+                            System.out.print("ID: " + lista[0] + ", ");
+                        }
+                        br.close();
 
-                        if(rp.existsById(id)) {
-                            System.out.println(rp.findById(id));
+                        System.out.println("\n\nIntroduce el ID del juego que quieres mostrar: ");
+                        int id = reader.nextInt();
+                        reader.nextLine();
+
+                        // Volvemos a abrir el archivo para buscar el juego
+                        BufferedReader br2 = new BufferedReader(new FileReader(archivo));
+                        Videojuego v = null;
+
+                        while ((linea = br2.readLine()) != null) {
+                            lista = linea.split(",");
+                            if (id == parseInt(lista[0])) {
+                                v = new Videojuego(lista[1], lista[2], lista[3], parseInt(lista[4].trim()));
+                                v.setId(id);
+                                break;
+                            }
+                        }
+                        br2.close();
+
+                        if (v != null) {
+                            System.out.println("ID: " + v.getId() + ", título: " + v.getTitulo());
                         } else {
-                            throw new IllegalArgumentException("Debes introducir un id que exista");
+                            System.out.println("No se encontró ningún videojuego con ese ID.");
                         }
-
-
                         break;
+                    }
 
                     case 4:
-                        Menus.menu1();
+                        System.out.println("Retornando... \n");
                         break;
                 }
-            } catch (InputMismatchException e) {
-                System.out.println("Introduce el tipo correcto de dato.");
-                sc.nextLine();
-            } catch(IllegalArgumentException e) {
-                System.out.println(e.getMessage());
+
+            } catch (IOException e) {
+                e.printStackTrace();
             }
 
-        } while (opcion != 4);
+        } while (opcion != 5);
 
-
+        System.out.println("Programa finalizado.");
     }
-
-
 }
-
