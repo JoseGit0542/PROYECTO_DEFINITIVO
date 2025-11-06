@@ -51,17 +51,17 @@ public class RepositorioVideojuego implements IRepositorioExtend<Videojuego,  In
     /**
      *
      * Devuelve true si existe la entidad con identificador id.
-     * @param integer    Identificador de la entidad
+     * @param id    Identificador de la entidad
      * @return      true si existe la entidad con el identificador id
      *
      * @throws IllegalArgumentException En caso de ser id nulo
      */
     @Override
-    public boolean existsById(Integer integer) {
-        if(integer == null){
-            throw new IllegalArgumentException("el id no debe de ser nulo");
+    public boolean existsById(Integer id) {
+        if (id == null) {
+            throw new IllegalArgumentException("El id no debe ser nulo");
         }
-        return true;
+        return lista.containsKey(id);
     }
     /**
      * Devuelve la entidad T con identificador id.

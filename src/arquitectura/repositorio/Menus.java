@@ -24,4 +24,13 @@ public class Menus {
         System.out.println("3: Mostrar videojuego con su nombre e identificador");
         System.out.println("4: Atrás");
     }
+    public static void menuEditar() {
+        System.out.println("------MENU DE EDICIÓN------");
+        System.out.println("Título.");
+        System.out.println("Categoría.");
+        System.out.println("Plataforma.");
+        System.out.println("Año.");
+        System.out.println("Introduce [titulo | categoria | plataforma | año] para editar dicho campo");
+        System.out.print(" o escribe [salir] para salir.");
+    }
 }
