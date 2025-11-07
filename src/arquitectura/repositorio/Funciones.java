@@ -2,12 +2,11 @@ package arquitectura.repositorio;
 
 import arquitectura.dominio.Videojuego;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.util.InputMismatchException;
 import java.util.Scanner;
+
+import static java.lang.Integer.parseInt;
 
 public class Funciones {
     public static void crearVideojuego(Scanner reader, RepositorioVideojuego repo) {
@@ -226,11 +225,97 @@ public class Funciones {
 
         String linea = "";
         for (int key : rp.getLista().keySet()) {
-            linea = rp.getLista().get(key).getId() + ", " + rp.getLista().get(key).getTitulo()
-                    + ", " + rp.getLista().get(key).getCategoria() + ", " + rp.getLista().get(key).getPlataforma()
-                    + ", " + rp.getLista().get(key).getAño() + "\n";
+            linea = rp.getLista().get(key).getId() + ";" + rp.getLista().get(key).getTitulo()
+                    + ";" + rp.getLista().get(key).getCategoria() + ";" + rp.getLista().get(key).getPlataforma()
+                    + ";" + rp.getLista().get(key).getAño();
             bw.write(linea);
+            bw.newLine();
         }
+        System.out.println("Cambios guardados con éxito en " + archivo.getAbsolutePath() + "\n");
         bw.close();
+    }
+    public static void mostrarBiblioteca(Scanner reader, RepositorioVideojuego rp, File archivo) throws IOException {
+        int opcion = 0;
+        String[] lista;
+
+        do {
+
+            System.out.println("");
+            Menus.menuMostrar();
+            opcion = reader.nextInt();
+            reader.nextLine(); // limpiar buffer
+
+
+            switch (opcion) {
+                case 1: {
+                    BufferedReader br = new BufferedReader(new FileReader(archivo));
+                    String lineaLeida;
+                    while ((lineaLeida = br.readLine()) != null) {
+                        System.out.println(lineaLeida);
+                    }
+                    br.close();
+                    break;
+                }
+
+                case 2: {
+                    BufferedReader br = new BufferedReader(new FileReader(archivo));
+                    int contador = 0;
+                    while (br.readLine() != null) {
+                        contador++;
+                    }
+                    br.close();
+                    System.out.println("Tienes " + contador + " juegos");
+                    break;
+                }
+
+                case 3: {
+                    System.out.println("Tu biblioteca es la siguiente: ");
+                    BufferedReader br = new BufferedReader(new FileReader(archivo));
+
+                    String linea;
+                    // Mostramos los IDs y nombres
+                    while ((linea = br.readLine()) != null) {
+                        lista = linea.split(";");
+                        System.out.print("ID: " + lista[0] + ", ");
+                    }
+                    br.close();
+
+                    System.out.println("\n\nIntroduce el ID del juego que quieres mostrar: ");
+                    int id = reader.nextInt();
+                    reader.nextLine();
+
+                    // Volvemos a abrir el archivo para buscar el juego
+                    BufferedReader br2 = new BufferedReader(new FileReader(archivo));
+                    Videojuego v = null;
+
+                    while ((linea = br2.readLine()) != null) {
+                        lista = linea.split(";");
+                        if (id == parseInt(lista[0])) {
+                            v = new Videojuego(lista[1].trim(), lista[2].trim(), lista[3].trim(), parseInt(lista[4].trim()));
+                            v.setId(id);
+                            break;
+                        }
+                    }
+                    br2.close();
+
+                    if (v != null) {
+                        System.out.println("ID: " + v.getId() + ", título: " + v.getTitulo());
+                    } else {
+                        System.out.println("No se encontró ningún videojuego con ese ID.");
+                    }
+                    break;
+                }
+
+                case 4:
+                    System.out.println("Retornando... \n");
+                    return;
+                default:
+                    System.out.println("Introduce un valor correcto...");
+
+            }
+
+
+
+        } while (true);
     }
 }

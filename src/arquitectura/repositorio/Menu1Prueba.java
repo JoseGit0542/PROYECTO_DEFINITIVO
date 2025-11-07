@@ -73,7 +73,7 @@ public class Menu1Prueba {
                         while ((linea = br2.readLine()) != null) {
                             lista = linea.split(",");
                             if (id == parseInt(lista[0])) {
-                                v = new Videojuego(lista[1], lista[2], lista[3], parseInt(lista[4].trim()));
+                                v = new Videojuego(lista[1].trim(), lista[2].trim(), lista[3].trim(), parseInt(lista[4].trim()));
                                 v.setId(id);
                                 break;
                             }

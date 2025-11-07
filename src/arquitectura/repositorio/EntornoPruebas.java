@@ -1,11 +1,12 @@
 package arquitectura.repositorio;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import arquitectura.dominio.Videojuego;
+
+import java.io.*;
 import java.util.InputMismatchException;
 import java.util.Scanner;
+
+import static java.lang.Integer.parseInt;
 
 public class EntornoPruebas {
     public static void main(String[] args) {
@@ -16,6 +17,9 @@ public class EntornoPruebas {
 
         //creo el repositorio
         RepositorioVideojuego rp = new RepositorioVideojuego();
+        File archivo = new File("archivo.txt");
+
+        cargarDesdeArchivo(rp, archivo);
 
         //variables de las respuestas
         int respuesta1 = 0;
@@ -23,7 +27,6 @@ public class EntornoPruebas {
         int id = 0;
         boolean estado = true;
         boolean estado2 = true;
-        File archivo = new File("archivo.txt");
 
 
 
@@ -66,61 +69,7 @@ public class EntornoPruebas {
 
                         break;
                     case 2:
-                        //compruebo que la lista esta vacía
-                        if (rp.getLista().isEmpty()) {
-                            System.out.println("La lista está vacía...\n");
-                            break;
-                        }
-
-                        int opcion = 0;
-                        do {
-
-
-                            System.out.println("");
-                            Menus.menuMostrar();
-                            opcion = reader.nextInt();
-                            switch (opcion) {
-                                case 1:
-                                    System.out.println("Tu biblioteca es la siguiente: \n");
-                                    for (int key : rp.getLista().keySet()) {
-                                        System.out.println("Id: " + rp.getLista().get(key).getId() + " título: " + rp.getLista().get(key).getTitulo() + ", categoría: " + rp.getLista().get(key).getCategoria() +
-                                                ", plataforma: " + rp.getLista().get(key).getPlataforma() + ", año: " + rp.getLista().get(key).getAño());
-                                    }
-                                    break;
-
-                                case 2:
-                                    long contador = rp.count();
-                                    System.out.println("Tamaño de la biblioteca: " + contador);
-                                    break;
-
-                                case 3:
-                                    System.out.println("Lista de IDS: ");
-                                    for (int key : rp.getLista().keySet()) {
-                                        System.out.print("[ " + rp.getLista().get(key).getId() + " ], ");
-                                    }
-                                    System.out.println("\n");
-                                    System.out.println("introduce el id del juego que quieres mostrar: ");
-
-
-                                    id = reader.nextInt();
-                                    reader.nextLine();
-
-                                    if (rp.existsById(id)) {
-                                        System.out.println(rp.findById(id));
-                                    } else {
-                                        throw new IllegalArgumentException("Debes introducir un id que exista");
-                                    }
-
-
-                                    break;
-
-                                case 4:
-                                    System.out.println("Retornando...\n");
-                                    break;
-                            }
-
-
-                        } while (opcion != 4);
+                        Funciones.mostrarBiblioteca(reader, rp, archivo);
                         break;
                     case 3:
                         Funciones.guardarCambios(rp, archivo);
@@ -145,6 +94,30 @@ public class EntornoPruebas {
             }
         } while (estado);
     }
+    public static void cargarDesdeArchivo(RepositorioVideojuego rp, File archivo) {
+        if (!archivo.exists()) return;
+
+        try (BufferedReader br = new BufferedReader(new FileReader(archivo))) {
+            String linea;
+            while ((linea = br.readLine()) != null) {
+                if (linea.trim().isEmpty()) continue;
+                String[] datos = linea.split(";");
+                int id = Integer.parseInt(datos[0].trim());
+                String titulo = datos[1].trim();
+                String categoria = datos[2].trim();
+                String plataforma = datos[3].trim();
+                int año = Integer.parseInt(datos[4].trim());
+
+                Videojuego v = new Videojuego(titulo, categoria, plataforma, año);
+                v.setId(id);
+                rp.getLista().put(id, v);
+            }
+        } catch (IOException e) {
+            System.err.println("Error al leer el archivo: " + e.getMessage());
+        }
+    }
+
+
 
 
 

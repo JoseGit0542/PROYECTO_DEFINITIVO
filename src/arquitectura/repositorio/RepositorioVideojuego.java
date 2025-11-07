@@ -44,9 +44,7 @@ public class RepositorioVideojuego implements IRepositorioExtend<Videojuego,  In
     @Override
     public void deleteAll() {
         //quito todos los campos del hashmap
-        for(int key : lista.keySet()) {
-            lista.remove(key);
-        }
+        lista.clear();
     }
     /**
      *
@@ -120,8 +118,13 @@ public class RepositorioVideojuego implements IRepositorioExtend<Videojuego,  In
 
     //clase para generar los ides de los videojuegos
     public static int generarId() {
-        int id = lista.size()+1;
-        return id;
+        if (lista.isEmpty()) return 1;
+
+        int maxId = 0;
+        for (int id : lista.keySet()) {
+            if (id > maxId) maxId = id;
+        }
+        return maxId + 1;
     }
 
     //getter para la lista
