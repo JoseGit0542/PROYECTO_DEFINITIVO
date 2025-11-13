@@ -26,7 +26,7 @@ public class Menu1Prueba {
                 opcion = reader.nextInt();
                 reader.nextLine(); // limpiar buffer
 
-                File archivo = new File("archivo.txt");
+                File archivo = new File("archivo.csv");
 
                 switch (opcion) {
                     case 1: {
