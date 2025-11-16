@@ -102,7 +102,7 @@ public class Main {
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
-        } while (estado);
+        } while (estad);
 
         // Guardar cambios finales al salir
         rpPersona.guardarEnArchivo(archivoPersonas);
