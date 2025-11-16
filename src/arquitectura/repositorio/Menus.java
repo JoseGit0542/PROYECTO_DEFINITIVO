@@ -6,7 +6,9 @@ public class Menus {
         System.out.println("1: Gestionar biblioteca. ");
         System.out.println("2: Mostrar biblioteca");
         System.out.println("3: Guardar los cambios");
+        System.out.println("4. Cambiar usuario / Registrar nuevo usuario");
         System.out.println("0: Salir ");
+        System.out.print("Elige una opción: ");
     }
     public static void menuGestion() {
         System.out.println("------GESTION DE BIBLIOTECA------");

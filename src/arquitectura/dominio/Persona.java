@@ -1,11 +1,18 @@
 package arquitectura.dominio;
 
+import arquitectura.repositorio.RepositorioPersona;
+
 public class Persona {
 
     //atributos
     private int id;
     private String nombre;
-    private String apellido;
+
+    //constructor
+    public Persona(String nombre) {
+        this.id = RepositorioPersona.generarId();
+        this.nombre = nombre;
+    }
 
     //getters y setters
     public void setId(int id) {
@@ -16,10 +23,6 @@ public class Persona {
         this.nombre = nombre;
     }
 
-    public void setApellido(String apellido) {
-        this.apellido = apellido;
-    }
-
     public int getId() {
         return id;
     }
@@ -28,19 +31,12 @@ public class Persona {
         return nombre;
     }
 
-    public String getApellido() {
-        return apellido;
-    }
 
     //metodo toString
     public String toString() {
-        return "ID: " + this.getId() + ", nombre: " + this.getNombre() + ", apellido: " + this.getApellido();
+        return "ID: " + this.getId() + ", nombre: " + this.getNombre();
     }
 
-    //clase para generar los ides de las personas
-    public static int generarId() {
 
-        return 0;
-    }
 
 }

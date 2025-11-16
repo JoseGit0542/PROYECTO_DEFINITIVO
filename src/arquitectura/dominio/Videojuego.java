@@ -4,31 +4,44 @@ import arquitectura.repositorio.RepositorioVideojuego;
 
 public class Videojuego {
 
-    //le damos los atributos a videojuego
     private int id;
     private String titulo;
     private String categoria;
     private String plataforma;
     private int año;
+    private int idPersona; // NUEVO: id de la persona propietaria
 
-    //Setters
-    public  void setTitulo(String titulo) {
+    // Constructor para crear nuevo videojuego (id autogenerado)
+    public Videojuego(String titulo, String categoria, String plataforma, int año, int idPersona) {
+        this.id = RepositorioVideojuego.generarId();
         this.titulo = titulo;
-    }
-    public void setCategoria(String categoria) {
         this.categoria = categoria;
-    }
-    public void setPlataforma(String plataforma) {
         this.plataforma = plataforma;
-    }
-    public void setAño(int año) {
         this.año = año;
-    }
-    public void setId(int id) {
-        this.id = id;
+        this.idPersona = idPersona;
     }
 
-    //getters
+    // Constructor para cargar desde archivo cuando ya conocemos el id del juego
+    public Videojuego(int id, String titulo, String categoria, String plataforma, int año, int idPersona) {
+        this.id = id;
+        this.titulo = titulo;
+        this.categoria = categoria;
+        this.plataforma = plataforma;
+        this.año = año;
+        this.idPersona = idPersona;
+    }
+
+    // Constructor simple (por compatibilidad)
+    public Videojuego(String titulo) {
+        this.id = RepositorioVideojuego.generarId();
+        this.titulo = titulo;
+        this.categoria = null;
+        this.plataforma = null;
+        this.año = 0;
+        this.idPersona = 0;
+    }
+
+    // Getters / Setters
     public int getId() {
         return id;
     }
@@ -44,35 +57,31 @@ public class Videojuego {
     public int getAño() {
         return año;
     }
+    public int getIdPersona() {
+        return idPersona;
+    }
 
-    //Constructor con todos los parametros
-    public Videojuego(String titulo, String categoria, String plataforma, int año) {
-        this.id = RepositorioVideojuego.generarId();
+    public void setTitulo(String titulo) {
         this.titulo = titulo;
+    }
+    public void setCategoria(String categoria) {
         this.categoria = categoria;
+    }
+    public void setPlataforma(String plataforma) {
         this.plataforma = plataforma;
+    }
+    public void setAño(int año) {
         this.año = año;
     }
-
-    //constructor con id y titulo
-    public Videojuego(String titulo) {
-        this.id = RepositorioVideojuego.generarId();
-        this.titulo = titulo;
-        this.categoria = null;
-        this.plataforma = null;
-        this.año = 0;
+    public void setIdPersona(int idPersona) {
+        this.idPersona = idPersona;
+    }
+    public void setId(int id) {
+        this.id = id;
     }
 
-    //metodo toString para mostrar los videojuegos
+    @Override
     public String toString() {
-    return "Id: " + this.id + ", título: " + this.titulo + ", categoria: " + this.categoria + ", plataforma: " + this.plataforma + ", año: " + this.año;
+        return id + ";" + titulo + ";" + categoria + ";" + plataforma + ";" + año + ";" + idPersona;
     }
-
-
-
-
-
-
-
-
 }
