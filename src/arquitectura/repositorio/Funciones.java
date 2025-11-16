@@ -216,7 +216,11 @@ public class Funciones {
     // ------------------ MOSTRAR BIBLIOTECA ------------------
     public static void mostrarBiblioteca(Scanner reader, RepositorioVideojuego repo, File archivo) throws IOException {
         int opcion;
-
+        if (!archivo.exists()) {
+            System.out.println("No se encontró el archivo: " + archivo.getAbsolutePath());
+            System.out.println("La biblioteca está vacía.");
+            return;
+        }
         do {
             Menus.menuMostrar();
             opcion = reader.nextInt();
@@ -226,10 +230,11 @@ public class Funciones {
             switch (opcion) {
                 case 1:
                     try (BufferedReader br = new BufferedReader(new FileReader(archivo))) {
-                        br.lines().forEach(System.out::println);
-                        if(br.readLine().isEmpty()) {
-                            System.out.println("El archivo esta vacio...");
+                        String linea = "";
+                        while ((linea = br.readLine()) != null) {
+                            System.out.println(linea);
                         }
+                        System.out.println("\n");
                     }
                     break;
 

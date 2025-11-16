@@ -132,8 +132,8 @@ public class EntornoPruebas {
                 }
             }
 
-            System.out.println("✅ Se han cargado " + contador + " videojuegos en memoria.");
-            System.out.println("📦 Total en repositorio: " + rp.count());
+            System.out.println("Se han cargado " + contador + " videojuegos en memoria.");
+            System.out.println("Total en repositorio: " + rp.count());
 
         } catch (IOException e) {
             System.err.println("Error al leer el archivo: " + e.getMessage());
