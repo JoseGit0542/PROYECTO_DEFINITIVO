@@ -272,4 +272,47 @@ public class Funciones {
 
         } while (true);
     }
+    public static void cargarDesdeArchivo(RepositorioVideojuego rp, File archivo) {
+        if (!archivo.exists()) {
+            System.out.println("No se encontró el archivo: " + archivo.getAbsolutePath());
+            return;
+        }
+
+        try (BufferedReader br = new BufferedReader(new FileReader(archivo))) {
+            String linea;
+            int contador = 0;
+
+            while ((linea = br.readLine()) != null) {
+                if (linea.trim().isEmpty()) continue;
+
+                String[] datos = linea.split(";");
+                if (datos.length < 5) {
+                    System.err.println("Línea inválida: " + linea);
+                    continue;
+                }
+
+                try {
+                    int id = Integer.parseInt(datos[0].trim());
+                    String titulo = datos[1].trim();
+                    String categoria = datos[2].trim();
+                    String plataforma = datos[3].trim();
+                    int año = Integer.parseInt(datos[4].trim());
+
+                    Videojuego v = new Videojuego(titulo, categoria, plataforma, año);
+                    v.setId(id);
+                    rp.getLista().put(id, v);
+
+                    contador++;
+                } catch (NumberFormatException e) {
+                    System.err.println("Error de formato numérico en línea: " + linea);
+                }
+            }
+
+            System.out.println("Se han cargado " + contador + " videojuegos en memoria.");
+            System.out.println("Total en repositorio: " + rp.count());
+
+        } catch (IOException e) {
+            System.err.println("Error al leer el archivo: " + e.getMessage());
+        }
+    }
 }
