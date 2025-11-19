@@ -7,7 +7,6 @@ import arquitectura.repositorio.RepositorioPersona;
 import arquitectura.repositorio.RepositorioVideojuego;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.InputMismatchException;
 import java.util.Scanner;
 
@@ -16,81 +15,56 @@ public class Main {
 
         Scanner reader = new Scanner(System.in);
 
-        // Repositorios
+        // Repositorios de videojuego y persona
         RepositorioVideojuego rp = new RepositorioVideojuego();
         RepositorioPersona rpPersona = new RepositorioPersona();
 
         File archivoVideojuegos = new File("videojuegos.csv");
         File archivoPersonas = new File("personas.csv");
 
-        // Cargar datos desde archivos
+        // Cargamos los datos desde los archivos
         rpPersona.cargarDesdeArchivo(archivoPersonas);
         rp.cargarDesdeArchivo(archivoVideojuegos);
 
-        // Login inicial o crear nuevo usuario
-        Persona personaActiva = login(reader, rpPersona, archivoPersonas);
+        // Gestión de usuarios al comienzo del programa
+        Persona personaActiva = login(reader, rpPersona);
 
-        // variables de las respuestas
-        int respuesta1;
-        int respuesta2;
         boolean estado = true;
-        boolean estado2;
 
         do {
             try {
                 Menus.menu1();
-                respuesta1 = reader.nextInt();
+                int respuesta1 = reader.nextInt();
                 reader.nextLine();
                 System.out.println("");
 
                 switch (respuesta1) {
-                    case 1:
+                    case 1 -> {
                         Menus.menuGestion();
-                        respuesta2 = reader.nextInt();
+                        int respuesta2 = reader.nextInt();
                         reader.nextLine();
 
                         switch (respuesta2) {
-                            case 1:
-                                estado2 = true;
-                                Funciones.crearVideojuegoCase(reader, rp, personaActiva, estado2);
-                                break;
-                            case 2:
-                                Funciones.eliminarVideojuegoId(rp, reader, personaActiva);
-                                break;
-                            case 3:
-                                Funciones.eliminarBiblioteca(rp, reader, personaActiva);
-                                break;
-                            case 4:
-                                Funciones.editarBiblioteca(rp, reader, personaActiva);
-                                break;
-                            case 5:
-                                System.out.println("Retornando... \n");
-                                break;
-                            default:
-                                System.out.println("Introduce un valor correcto");
+                            case 1 -> Funciones.crearVideojuegoCase(reader, rp, personaActiva);
+                            case 2 -> Funciones.eliminarVideojuegoId(rp, reader, personaActiva);
+                            case 3 -> Funciones.eliminarBiblioteca(rp, reader, personaActiva);
+                            case 4 -> Funciones.editarBiblioteca(rp, reader, personaActiva);
+                            case 5 -> System.out.println("Retornando... \n");
+                            default -> System.out.println("Introduce un valor correcto");
                         }
-                        break;
-
-                    case 2:
-                        Funciones.mostrarBiblioteca(reader, rp, archivoVideojuegos, personaActiva);
-                        break;
-
-                    case 3:
-                        Funciones.guardarCambios(rp, archivoVideojuegos);
-                        break;
-
-                    case 4:
-                        // Cambiar de usuario o crear uno nuevo
-                        personaActiva = login(reader, rpPersona, archivoPersonas);
-                        break;
-
-                    case 0:
+                    }
+                    case 2 -> Funciones.mostrarBiblioteca(reader, rp, personaActiva);
+                    case 3 -> {
+                        // Guardar cambios en repositorio de videojuegos
+                        rp.guardarEnArchivo(archivoVideojuegos);
+                        System.out.println("Cambios guardados en videojuegos.csv\n");
+                    }
+                    case 4 -> personaActiva = login(reader, rpPersona);
+                    case 0 -> {
                         System.out.println("Saliendo del programa...");
                         estado = false;
-                        break;
-
-                    default:
-                        System.out.println("Vuelve a introducir un valor.");
+                    }
+                    default -> System.out.println("Vuelve a introducir un valor.");
                 }
 
             } catch (InputMismatchException e) {
@@ -99,8 +73,6 @@ public class Main {
             } catch (IllegalArgumentException e) {
                 System.out.println("Introduce un argumento correcto. \n");
                 reader.next();
-            } catch (IOException e) {
-                throw new RuntimeException(e);
             }
         } while (estado);
 
@@ -110,8 +82,8 @@ public class Main {
         reader.close();
     }
 
-    // login mejorado: crear o iniciar sesión con cualquier usuario
-    public static Persona login(Scanner reader, RepositorioPersona rp, File archivoPersonas) {
+    // Login mejorado: crear o iniciar sesión con cualquier usuario
+    public static Persona login(Scanner reader, RepositorioPersona rp) {
         Persona actual = null;
 
         while (actual == null) {
@@ -126,24 +98,18 @@ public class Main {
                 reader.nextLine();
 
                 switch (opcion) {
-                    case 1:
+                    case 1 -> {
                         System.out.print("Introduce tu nombre: ");
                         String nombre = reader.nextLine().trim();
                         if (!nombre.isEmpty()) {
-                            // Crear persona y guardar en repositorio
                             Persona nuevo = new Persona(nombre);
                             rp.save(nuevo);
-
-                            // Guardado inmediato en CSV
-                            rp.guardarEnArchivo(archivoPersonas);
-
                             System.out.println("Usuario creado con ID: " + nuevo.getId());
                         } else {
                             System.out.println("Nombre inválido.");
                         }
-                        break;
-
-                    case 2:
+                    }
+                    case 2 -> {
                         if (rp.count() == 0) {
                             System.out.println("No hay usuarios registrados. Crea uno primero.");
                             break;
@@ -165,10 +131,8 @@ public class Main {
                         } else {
                             System.out.println("ID no encontrado. Intenta de nuevo.");
                         }
-                        break;
-
-                    default:
-                        System.out.println("Opción incorrecta.");
+                    }
+                    default -> System.out.println("Opción incorrecta.");
                 }
 
             } catch (InputMismatchException ime) {
