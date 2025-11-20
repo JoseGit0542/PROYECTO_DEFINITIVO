@@ -5,15 +5,26 @@ import arquitectura.dominio.Videojuego;
 import java.io.*;
 import java.util.*;
 
-
-import arquitectura.dominio.Videojuego;
-
-import java.io.*;
-import java.util.*;
-
 public class RepositorioVideojuego implements IRepositorioExtend<Videojuego, Integer> {
 
     private static final Map<Integer, Videojuego> lista = new HashMap<>();
+    private File archivo; // archivo asociado al repositorio
+
+    public RepositorioVideojuego() {}
+
+    public RepositorioVideojuego(File archivo) {
+        this.archivo = archivo;
+        cargarDesdeArchivo();
+    }
+
+    public void setArchivo(File archivo) {
+        this.archivo = archivo;
+        cargarDesdeArchivo();
+    }
+
+    private void guardar() {
+        if (archivo != null) guardarEnArchivo();
+    }
 
     @Override
     public long count() {
@@ -23,11 +34,13 @@ public class RepositorioVideojuego implements IRepositorioExtend<Videojuego, Int
     @Override
     public void deleteById(Integer id) {
         lista.remove(id);
+        guardar();
     }
 
     @Override
     public void deleteAll() {
         lista.clear();
+        guardar();
     }
 
     @Override
@@ -44,8 +57,7 @@ public class RepositorioVideojuego implements IRepositorioExtend<Videojuego, Int
 
     @Override
     public Optional<Videojuego> findByIdOptional(Integer id) {
-        if (id == null) throw new IllegalArgumentException("El id no debe ser nulo");
-        return Optional.ofNullable(lista.get(id));
+        return Optional.ofNullable(findById(id));
     }
 
     @Override
@@ -56,9 +68,9 @@ public class RepositorioVideojuego implements IRepositorioExtend<Videojuego, Int
     @Override
     public <S extends Videojuego> S save(S entity) {
         if (entity == null) throw new IllegalArgumentException("entity no debe ser nulo");
-        int id = generarId();
-        entity.setId(id); // asegúrate de que Videojuego tiene setId(int)
-        lista.put(id, entity);
+        if (entity.getId() <= 0) entity.setId(generarId());
+        lista.put(entity.getId(), entity);
+        guardar(); // guardado automático
         return entity;
     }
 
@@ -69,23 +81,16 @@ public class RepositorioVideojuego implements IRepositorioExtend<Videojuego, Int
     // -------------------------
     // Métodos de dominio útiles
     // -------------------------
-
     public List<Videojuego> listarPorPersona(int idPersona) {
         List<Videojuego> propios = new ArrayList<>();
         for (Videojuego v : lista.values()) {
-            if (v.getIdPersona() == idPersona) {
-                propios.add(v);
-            }
+            if (v.getIdPersona() == idPersona) propios.add(v);
         }
         return propios;
     }
 
     public long contarPorPersona(int idPersona) {
-        long count = 0;
-        for (Videojuego v : lista.values()) {
-            if (v.getIdPersona() == idPersona) count++;
-        }
-        return count;
+        return listarPorPersona(idPersona).size();
     }
 
     public Optional<Videojuego> obtenerSiPertenece(int id, int idPersona) {
@@ -95,33 +100,27 @@ public class RepositorioVideojuego implements IRepositorioExtend<Videojuego, Int
     }
 
     public void eliminarBibliotecaDePersona(int idPersona) {
-        // recopilamos IDs para evitar ConcurrentModification
         List<Integer> ids = new ArrayList<>();
         for (Map.Entry<Integer, Videojuego> e : lista.entrySet()) {
-            if (e.getValue().getIdPersona() == idPersona) {
-                ids.add(e.getKey());
-            }
+            if (e.getValue().getIdPersona() == idPersona) ids.add(e.getKey());
         }
-        for (int id : ids) {
-            lista.remove(id);
-        }
+        for (int id : ids) lista.remove(id);
+        guardar(); // guardado automático
     }
 
     // -------------------------
     // Gestión de ficheros (CSV)
     // -------------------------
-
-    public void guardarEnArchivo(File archivo) {
+    public void guardarEnArchivo() {
+        if (archivo == null) return;
         try (BufferedWriter bw = new BufferedWriter(new FileWriter(archivo))) {
             for (Videojuego v : lista.values()) {
-                bw.write(
-                        v.getId() + ";" +
-                                v.getTitulo() + ";" +
-                                v.getCategoria() + ";" +
-                                v.getPlataforma() + ";" +
-                                v.getAño() + ";" +
-                                v.getIdPersona()
-                );
+                bw.write(v.getId() + ";" +
+                        v.getTitulo() + ";" +
+                        v.getCategoria() + ";" +
+                        v.getPlataforma() + ";" +
+                        v.getAño() + ";" +
+                        v.getIdPersona());
                 bw.newLine();
             }
         } catch (IOException e) {
@@ -129,12 +128,11 @@ public class RepositorioVideojuego implements IRepositorioExtend<Videojuego, Int
         }
     }
 
-    public void cargarDesdeArchivo(File archivo) {
-        if (!archivo.exists()) return;
-
+    public void cargarDesdeArchivo() {
+        if (archivo == null || !archivo.exists()) return;
         try (BufferedReader br = new BufferedReader(new FileReader(archivo))) {
-            String linea;
             lista.clear();
+            String linea;
             while ((linea = br.readLine()) != null) {
                 if (linea.trim().isEmpty()) continue;
                 String[] datos = linea.split(";");

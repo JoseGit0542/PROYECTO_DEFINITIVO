@@ -5,15 +5,27 @@ import arquitectura.dominio.Persona;
 import java.io.*;
 import java.util.*;
 
-import arquitectura.dominio.Persona;
-
-import java.io.*;
-import java.util.*;
-
 public class RepositorioPersona {
 
     private static int contadorId = 0;
     private final Map<Integer, Persona> lista = new HashMap<>();
+    private File archivo; // archivo asociado al repositorio
+
+    public RepositorioPersona() {}
+
+    public RepositorioPersona(File archivo) {
+        this.archivo = archivo;
+        cargarDesdeArchivo();
+    }
+
+    public void setArchivo(File archivo) {
+        this.archivo = archivo;
+        cargarDesdeArchivo();
+    }
+
+    private void guardar() {
+        if (archivo != null) guardarEnArchivo();
+    }
 
     public Map<Integer, Persona> getLista() {
         return lista;
@@ -24,13 +36,10 @@ public class RepositorioPersona {
     }
 
     public void save(Persona p) {
-        if (p.getId() <= 0) {
-            int id = generarId();
-            p.setId(id); // asegúrate de que Persona tiene setId(int)
-        } else if (p.getId() > contadorId) {
-            contadorId = p.getId();
-        }
+        if (p.getId() <= 0) p.setId(generarId());
+        else if (p.getId() > contadorId) contadorId = p.getId();
         lista.put(p.getId(), p);
+        guardar(); // guardado automático
     }
 
     public Persona findById(int id) {
@@ -47,26 +56,25 @@ public class RepositorioPersona {
 
     public void deleteAll() {
         lista.clear();
+        guardar();
     }
 
-    public int count() {
-        return lista.size();
+    public void deleteById(int id) {
+        lista.remove(id);
+        guardar();
     }
 
     // -------------------------
     // Gestión de ficheros (CSV)
     // -------------------------
-
-    // Formato: id;nombre (sin encabezado)
-    public void cargarDesdeArchivo(File archivo) {
-        if (!archivo.exists()) {
+    public void cargarDesdeArchivo() {
+        if (archivo == null || !archivo.exists()) {
             System.out.println("Archivo de personas no encontrado. Se creará uno nuevo al guardar.");
             return;
         }
-
         try (BufferedReader br = new BufferedReader(new FileReader(archivo))) {
-            String linea;
             lista.clear();
+            String linea;
             while ((linea = br.readLine()) != null) {
                 if (linea.trim().isEmpty()) continue;
                 String[] datos = linea.split(";");
@@ -76,7 +84,7 @@ public class RepositorioPersona {
                 String nombre = datos[1].trim();
 
                 Persona p = new Persona(nombre);
-                p.setId(id); // aseguramos el id cargado desde CSV
+                p.setId(id);
                 lista.put(id, p);
 
                 if (id > contadorId) contadorId = id;
@@ -86,7 +94,8 @@ public class RepositorioPersona {
         }
     }
 
-    public void guardarEnArchivo(File archivo) {
+    public void guardarEnArchivo() {
+        if (archivo == null) return;
         try (BufferedWriter bw = new BufferedWriter(new FileWriter(archivo))) {
             for (Persona p : lista.values()) {
                 bw.write(p.getId() + ";" + p.getNombre());
@@ -97,8 +106,15 @@ public class RepositorioPersona {
         }
     }
 
-    public void deleteById(int id) {
-        lista.remove(id);
+    public int count() {
+        return lista.size();
+
+
+
+
+
+
+
+
     }
 }
-

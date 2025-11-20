@@ -6,25 +6,22 @@ import arquitectura.repositorio.Menus;
 import arquitectura.repositorio.RepositorioPersona;
 import arquitectura.repositorio.RepositorioVideojuego;
 
-import java.io.File;
 import java.util.InputMismatchException;
 import java.util.Scanner;
+import java.io.File;
 
 public class Main {
     public static void main(String[] args) {
 
         Scanner reader = new Scanner(System.in);
 
-        // Repositorios de videojuego y persona
-        RepositorioVideojuego rp = new RepositorioVideojuego();
-        RepositorioPersona rpPersona = new RepositorioPersona();
-
+        // Archivos CSV
         File archivoVideojuegos = new File("videojuegos.csv");
         File archivoPersonas = new File("personas.csv");
 
-        // Cargamos los datos desde los archivos
-        rpPersona.cargarDesdeArchivo(archivoPersonas);
-        rp.cargarDesdeArchivo(archivoVideojuegos);
+        // Repositorios inicializados con sus archivos
+        RepositorioVideojuego rp = new RepositorioVideojuego(archivoVideojuegos);
+        RepositorioPersona rpPersona = new RepositorioPersona(archivoPersonas);
 
         // Gestión de usuarios al comienzo del programa
         Persona personaActiva = login(reader, rpPersona);
@@ -54,11 +51,6 @@ public class Main {
                         }
                     }
                     case 2 -> Funciones.mostrarBiblioteca(reader, rp, personaActiva);
-                    case 3 -> {
-                        // Guardar cambios en repositorio de videojuegos
-                        rp.guardarEnArchivo(archivoVideojuegos);
-                        System.out.println("Cambios guardados en videojuegos.csv\n");
-                    }
                     case 4 -> personaActiva = login(reader, rpPersona);
                     case 0 -> {
                         System.out.println("Saliendo del programa...");
@@ -76,9 +68,7 @@ public class Main {
             }
         } while (estado);
 
-        // Guardar cambios finales al salir
-        rpPersona.guardarEnArchivo(archivoPersonas);
-        rp.guardarEnArchivo(archivoVideojuegos);
+        // No es necesario guardar manualmente; repositorios lo hacen automáticamente
         reader.close();
     }
 
@@ -103,7 +93,8 @@ public class Main {
                         String nombre = reader.nextLine().trim();
                         if (!nombre.isEmpty()) {
                             Persona nuevo = new Persona(nombre);
-                            rp.save(nuevo);
+                            rp.save(nuevo); // guardado automático
+                            actual = nuevo; // inicia sesión con el usuario creado
                             System.out.println("Usuario creado con ID: " + nuevo.getId());
                         } else {
                             System.out.println("Nombre inválido.");
