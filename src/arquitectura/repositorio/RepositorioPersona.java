@@ -109,12 +109,68 @@ public class RepositorioPersona {
     public int count() {
         return lista.size();
 
+    }
+    // Login mejorado: crear o iniciar sesión con cualquier usuario
+    public static Persona login( RepositorioPersona rp) {
+        Scanner reader = new Scanner(System.in);
+        Persona actual = null;
 
+        while (actual == null) {
+            System.out.println("\n---- PANEL DE INICIO DE SESIÓN ----");
+            System.out.println("1. Crear nuevo usuario");
+            System.out.println("2. Iniciar sesión con usuario existente");
+            System.out.print("Elige una opción: ");
+            System.out.println("");
 
+            try {
+                int opcion = reader.nextInt();
+                reader.nextLine();
 
+                switch (opcion) {
+                    case 1 -> {
+                        System.out.print("Introduce tu nombre: ");
+                        String nombre = reader.nextLine().trim();
+                        if (!nombre.isEmpty()) {
+                            Persona nuevo = new Persona(nombre);
+                            rp.save(nuevo); // guardado automático
+                            actual = nuevo; // inicia sesión con el usuario creado
+                            System.out.println("Usuario creado con ID: " + nuevo.getId());
+                        } else {
+                            System.out.println("Nombre inválido.");
+                        }
+                    }
+                    case 2 -> {
+                        if (rp.count() == 0) {
+                            System.out.println("No hay usuarios registrados. Crea uno primero.");
+                            break;
+                        }
 
+                        System.out.println("Usuarios registrados:");
+                        for (Persona p : rp.findAll()) {
+                            System.out.println(p.getId() + " - " + p.getNombre());
+                        }
 
+                        System.out.println("");
+                        System.out.print("Introduce tu ID: ");
+                        int id = reader.nextInt();
+                        reader.nextLine();
 
+                        if (rp.existsById(id)) {
+                            actual = rp.findById(id);
+                            System.out.println("Has iniciado sesión como: " + actual.getNombre() + "\n");
+                        } else {
+                            System.out.println("ID no encontrado. Intenta de nuevo.");
+                        }
+                    }
+                    default -> System.out.println("Opción incorrecta.");
+                }
 
+            } catch (InputMismatchException ime) {
+                System.out.println("Introduce un número válido.");
+                reader.nextLine();
+            }
+        }
+
+        return actual;
     }
 }

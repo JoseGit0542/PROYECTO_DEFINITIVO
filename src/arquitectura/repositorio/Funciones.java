@@ -15,7 +15,9 @@ import java.util.Scanner;
 
 public class Funciones {
 
-    public static void crearVideojuego(Scanner reader, RepositorioVideojuego repo, Persona personaActiva) {
+    public static void crearVideojuego(RepositorioVideojuego repo, Persona personaActiva) {
+
+        Scanner reader = new Scanner(System.in);
         try {
             System.out.print("Introduce el título del videojuego: ");
             String titulo = reader.nextLine();
@@ -49,7 +51,7 @@ public class Funciones {
             reader.nextLine();
 
             switch (respuesta3) {
-                case 1 -> crearVideojuego(reader, repo, personaActiva);
+                case 1 -> crearVideojuego(repo, personaActiva);
                 case 2 -> {
                     estado2 = false;
                     System.out.println("Retornando... \n");
@@ -60,7 +62,8 @@ public class Funciones {
         } while (estado2);
     }
 
-    public static void eliminarVideojuegoId(RepositorioVideojuego repo, Scanner reader, Persona personaActiva) {
+    public static void eliminarVideojuegoId(RepositorioVideojuego repo, Persona personaActiva) {
+        Scanner reader = new Scanner(System.in);
         if (repo.count() == 0) {
             System.out.println("La lista está vacía. Retornando...\n");
             return;
@@ -101,7 +104,8 @@ public class Funciones {
         }
     }
 
-    public static void eliminarBiblioteca(RepositorioVideojuego repo, Scanner reader, Persona personaActiva) {
+    public static void eliminarBiblioteca(RepositorioVideojuego repo, Persona personaActiva) {
+        Scanner reader = new Scanner(System.in);
         List<Videojuego> propios = repo.listarPorPersona(personaActiva.getId());
         if (propios.isEmpty()) {
             System.out.println("No tienes videojuegos que borrar. \n");
@@ -122,7 +126,8 @@ public class Funciones {
         }
     }
 
-    public static void editarBiblioteca(RepositorioVideojuego repo, Scanner reader, Persona personaActiva) {
+    public static void editarBiblioteca(RepositorioVideojuego repo, Persona personaActiva) {
+        Scanner reader = new Scanner(System.in);
         List<Videojuego> propios = repo.listarPorPersona(personaActiva.getId());
         if (propios.isEmpty()) {
             System.out.println("No tienes videojuegos para editar. \n");
@@ -192,7 +197,8 @@ public class Funciones {
     }
 
     // Mostrar sin tocar archivos: todo desde el repositorio
-    public static void mostrarBiblioteca(Scanner reader, RepositorioVideojuego repo, Persona personaActiva) {
+    public static void mostrarBiblioteca(RepositorioVideojuego repo, Persona personaActiva) {
+        Scanner reader = new Scanner(System.in);
         if (repo.contarPorPersona(personaActiva.getId()) == 0) {
             System.out.println("La biblioteca está vacía.");
             return;

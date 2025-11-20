@@ -9,9 +9,8 @@ public class Videojuego {
     private String categoria;
     private String plataforma;
     private int año;
-    private int idPersona; // NUEVO: id de la persona propietaria
+    private int idPersona;
 
-    // Constructor para crear nuevo videojuego (id autogenerado)
     public Videojuego(String titulo, String categoria, String plataforma, int año, int idPersona) {
         this.id = RepositorioVideojuego.generarId();
         this.titulo = titulo;
@@ -21,7 +20,6 @@ public class Videojuego {
         this.idPersona = idPersona;
     }
 
-    // Constructor para cargar desde archivo cuando ya conocemos el id del juego
     public Videojuego(int id, String titulo, String categoria, String plataforma, int año, int idPersona) {
         this.id = id;
         this.titulo = titulo;
@@ -31,7 +29,6 @@ public class Videojuego {
         this.idPersona = idPersona;
     }
 
-    // Constructor simple (por compatibilidad)
     public Videojuego(String titulo) {
         this.id = RepositorioVideojuego.generarId();
         this.titulo = titulo;
@@ -41,7 +38,6 @@ public class Videojuego {
         this.idPersona = 0;
     }
 
-    // Getters / Setters
     public int getId() {
         return id;
     }
