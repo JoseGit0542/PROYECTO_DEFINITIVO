@@ -51,7 +51,7 @@ public class Main {
                         }
                     }
                     case 2 -> Funciones.mostrarBiblioteca(reader, rp, personaActiva);
-                    case 4 -> personaActiva = login(reader, rpPersona);
+                    case 3 -> personaActiva = login(reader, rpPersona);
                     case 0 -> {
                         System.out.println("Saliendo del programa...");
                         estado = false;
