@@ -1,21 +1,16 @@
 package arquitectura.App;
 
 import arquitectura.dominio.Persona;
-import arquitectura.repositorio.Funciones;
-import arquitectura.repositorio.Menus;
-import arquitectura.repositorio.RepositorioPersona;
-import arquitectura.repositorio.RepositorioVideojuego;
+import arquitectura.repositorio.*;
 
-import java.util.InputMismatchException;
-import java.util.Scanner;
 import java.io.File;
+import java.util.Scanner;
+import java.util.InputMismatchException;
 
 public class Main {
     public static void main(String[] args) {
 
         Scanner reader = new Scanner(System.in);
-
-
 
         // Archivos CSV
         File archivoVideojuegos = new File("videojuegos.csv");
@@ -28,6 +23,9 @@ public class Main {
         // Gestión de usuarios al comienzo del programa
         Persona personaActiva = RepositorioPersona.login(rpPersona);
 
+        // Creamos objeto Funciones con variables internas
+        Funciones funciones = new Funciones(reader, rp, rpPersona, personaActiva);
+
         boolean estado = true;
 
         do {
@@ -35,7 +33,7 @@ public class Main {
                 Menus.menu1();
                 int respuesta1 = reader.nextInt();
                 reader.nextLine();
-                System.out.println("");
+                System.out.println();
 
                 switch (respuesta1) {
                     case 1 -> {
@@ -44,16 +42,19 @@ public class Main {
                         reader.nextLine();
 
                         switch (respuesta2) {
-                            case 1 -> Funciones.crearVideojuegoCase(reader, rp, personaActiva);
-                            case 2 -> Funciones.eliminarVideojuegoId(rp, personaActiva);
-                            case 3 -> Funciones.eliminarBiblioteca(rp, personaActiva);
-                            case 4 -> Funciones.editarBiblioteca(rp, personaActiva);
+                            case 1 -> funciones.crearVideojuegoCase();
+                            case 2 -> funciones.eliminarVideojuegoId();
+                            case 3 -> funciones.eliminarBiblioteca();
+                            case 4 -> funciones.editarBiblioteca();
                             case 5 -> System.out.println("Retornando... \n");
                             default -> System.out.println("Introduce un valor correcto");
                         }
                     }
-                    case 2 -> Funciones.mostrarBiblioteca(rp, personaActiva);
-                    case 3 -> personaActiva = rpPersona.login( rpPersona);
+                    case 2 -> funciones.mostrarBiblioteca();
+                    case 3 -> {
+                        personaActiva = rpPersona.login(rpPersona);
+                        funciones.setPersonaActiva(personaActiva);
+                    }
                     case 0 -> {
                         System.out.println("Saliendo del programa...");
                         estado = false;
@@ -73,6 +74,4 @@ public class Main {
         // No es necesario guardar manualmente; repositorios lo hacen automáticamente
         reader.close();
     }
-
-
 }

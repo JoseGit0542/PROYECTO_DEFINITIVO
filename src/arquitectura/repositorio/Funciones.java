@@ -3,21 +3,29 @@ package arquitectura.repositorio;
 import arquitectura.dominio.Videojuego;
 import arquitectura.dominio.Persona;
 
-import java.io.*;
 import java.util.*;
-
-import arquitectura.dominio.Videojuego;
-import arquitectura.dominio.Persona;
-
-import java.util.InputMismatchException;
-import java.util.List;
-import java.util.Scanner;
 
 public class Funciones {
 
-    public static void crearVideojuego(RepositorioVideojuego repo, Persona personaActiva) {
+    private final Scanner reader;
+    private final RepositorioVideojuego repo;
+    private final RepositorioPersona repoPersona;
+    private Persona personaActiva;
 
-        Scanner reader = new Scanner(System.in);
+    public Funciones(Scanner reader, RepositorioVideojuego repo,
+                     RepositorioPersona repoPersona, Persona personaActiva) {
+        this.reader = reader;
+        this.repo = repo;
+        this.repoPersona = repoPersona;
+        this.personaActiva = personaActiva;
+    }
+
+    // Permite actualizar el usuario activo tras un login
+    public void setPersonaActiva(Persona personaActiva) {
+        this.personaActiva = personaActiva;
+    }
+
+    public void crearVideojuego() {
         try {
             System.out.print("Introduce el título del videojuego: ");
             String titulo = reader.nextLine();
@@ -32,26 +40,30 @@ public class Funciones {
             int año = reader.nextInt();
             reader.nextLine();
 
-            Videojuego v = new Videojuego(titulo, categoria, plataforma, año, personaActiva.getId());
+            Videojuego v = new Videojuego(
+                    titulo, categoria, plataforma, año, personaActiva.getId()
+            );
             repo.save(v);
 
-            System.out.println("Videojuego \"" + titulo + "\" añadido correctamente para " + personaActiva.getNombre() + ".\n");
+            System.out.println("Videojuego \"" + titulo + "\" añadido correctamente.\n");
 
         } catch (InputMismatchException e) {
-            System.out.println("Introduce el tipo correcto de dato.");
+            System.out.println("Introduce un tipo correcto de dato.");
             reader.nextLine();
         }
     }
 
-    public static void crearVideojuegoCase(Scanner reader, RepositorioVideojuego repo, Persona personaActiva) {
+
+    public void crearVideojuegoCase() {
         boolean estado2 = true;
+
         do {
             System.out.println("1: Crear videojuego | 2: salir |");
             int respuesta3 = reader.nextInt();
             reader.nextLine();
 
             switch (respuesta3) {
-                case 1 -> crearVideojuego(repo, personaActiva);
+                case 1 -> crearVideojuego();
                 case 2 -> {
                     estado2 = false;
                     System.out.println("Retornando... \n");
@@ -62,8 +74,8 @@ public class Funciones {
         } while (estado2);
     }
 
-    public static void eliminarVideojuegoId(RepositorioVideojuego repo, Persona personaActiva) {
-        Scanner reader = new Scanner(System.in);
+    public void eliminarVideojuegoId() {
+
         if (repo.count() == 0) {
             System.out.println("La lista está vacía. Retornando...\n");
             return;
@@ -72,15 +84,17 @@ public class Funciones {
         while (true) {
             System.out.println("-------Eliminar videojuego por ID------");
             List<Videojuego> lista = repo.listarPorPersona(personaActiva.getId());
+
             if (lista.isEmpty()) {
                 System.out.println("No tienes videojuegos registrados. Retornando...\n");
                 return;
             }
+
             for (Videojuego v : lista) {
                 System.out.println("ID: " + v.getId() + ", título: " + v.getTitulo());
             }
 
-            System.out.print("\nIntroduce un ID del videojuego deseado [0 para salir]: ");
+            System.out.print("\nIntroduce un ID [0 para salir]: ");
             int id = reader.nextInt();
             reader.nextLine();
 
@@ -92,51 +106,44 @@ public class Funciones {
             if (repo.obtenerSiPertenece(id, personaActiva.getId()).isPresent()) {
                 Videojuego eliminado = repo.findById(id);
                 repo.deleteById(id);
-                System.out.println("El videojuego \"" + eliminado.getTitulo() + "\" ha sido eliminado con éxito.\n");
+                System.out.println("El videojuego \"" + eliminado.getTitulo() + "\" ha sido eliminado.\n");
             } else {
-                System.out.println("No se ha encontrado el ID especificado (o no pertenece a tu cuenta).\n");
-            }
-
-            if (repo.count() == 0) {
-                System.out.println("La lista global ha quedado vacía. Retornando...\n");
-                break;
+                System.out.println("ID no encontrado o no pertenece a tu cuenta.\n");
             }
         }
     }
 
-    public static void eliminarBiblioteca(RepositorioVideojuego repo, Persona personaActiva) {
-        Scanner reader = new Scanner(System.in);
+    public void eliminarBiblioteca() {
         List<Videojuego> propios = repo.listarPorPersona(personaActiva.getId());
+
         if (propios.isEmpty()) {
             System.out.println("No tienes videojuegos que borrar. \n");
             return;
         }
 
         System.out.println("------ELIMINAR TODA TU BIBLIOTECA-------");
-        System.out.println("¿Estás seguro [si/no]? (solo eliminará tus juegos)");
+        System.out.println("¿Estás seguro [si/no]?");
         String seguro = reader.nextLine().toLowerCase();
 
         if (seguro.equals("si")) {
             repo.eliminarBibliotecaDePersona(personaActiva.getId());
             System.out.println("Tu biblioteca ha sido borrada con éxito.");
-        } else if (seguro.equals("no")) {
-            System.out.println("Retornando... \n");
         } else {
-            System.out.println("Debes introducir un valor correcto.");
+            System.out.println("Retornando...\n");
         }
     }
 
-    public static void editarBiblioteca(RepositorioVideojuego repo, Persona personaActiva) {
-        Scanner reader = new Scanner(System.in);
+    public void editarBiblioteca() {
+
         List<Videojuego> propios = repo.listarPorPersona(personaActiva.getId());
+
         if (propios.isEmpty()) {
-            System.out.println("No tienes videojuegos para editar. \n");
+            System.out.println("No tienes videojuegos para editar.\n");
             return;
         }
 
         while (true) {
             System.out.println("------EDITAR BIBLIOTECA------");
-            System.out.println("Tu biblioteca actual:");
             for (Videojuego v : propios) {
                 System.out.println("ID: " + v.getId() + ", título: " + v.getTitulo()
                         + ", categoría: " + v.getCategoria()
@@ -144,61 +151,57 @@ public class Funciones {
                         + ", año: " + v.getAño());
             }
 
-            System.out.print("\nIntroduce un ID del videojuego deseado [0 para salir]: ");
+            System.out.print("\nIntroduce un ID [0 para salir]: ");
             int id = reader.nextInt();
             reader.nextLine();
 
             if (id == 0) {
-                System.out.println("Retornando... \n");
-                break;
+                System.out.println("Retornando...\n");
+                return;
             }
 
-            if (repo.obtenerSiPertenece(id, personaActiva.getId()).isEmpty()) {
-                System.out.println("El ID introducido no existe en tu biblioteca.\n");
+            Optional<Videojuego> opt = repo.obtenerSiPertenece(id, personaActiva.getId());
+            if (opt.isEmpty()) {
+                System.out.println("El ID introducido no existe.\n");
                 continue;
             }
 
-            Videojuego v = repo.findById(id);
+            Videojuego v = opt.get();
+            String opcionEdicion;
 
-            String respuestaEdicion;
             do {
                 Menus.menuEditar();
                 System.out.print("¿Qué campo deseas editar?: ");
-                respuestaEdicion = reader.nextLine().trim().toLowerCase();
+                opcionEdicion = reader.nextLine().trim().toLowerCase();
 
-                switch (respuestaEdicion) {
+                switch (opcionEdicion) {
                     case "titulo" -> {
                         System.out.print("Nuevo título: ");
                         v.setTitulo(reader.nextLine());
-                        System.out.println("Título cambiado con éxito.\n");
                     }
                     case "categoria" -> {
                         System.out.print("Nueva categoría: ");
                         v.setCategoria(reader.nextLine());
-                        System.out.println("Categoría cambiada con éxito.\n");
                     }
                     case "plataforma" -> {
                         System.out.print("Nueva plataforma: ");
                         v.setPlataforma(reader.nextLine());
-                        System.out.println("Plataforma cambiada con éxito.\n");
                     }
                     case "año" -> {
                         System.out.print("Nuevo año: ");
                         v.setAño(reader.nextInt());
                         reader.nextLine();
-                        System.out.println("Año cambiado con éxito.\n");
                     }
-                    case "salir" -> System.out.println("Retornando al menú principal...\n");
-                    default -> System.out.println("Debes introducir un campo válido.\n");
+                    case "salir" -> System.out.println("Retornando...\n");
+                    default -> System.out.println("Opción no válida.\n");
                 }
 
-            } while (!respuestaEdicion.equalsIgnoreCase("salir"));
+            } while (!opcionEdicion.equals("salir"));
         }
     }
 
-    // Mostrar sin tocar archivos: todo desde el repositorio
-    public static void mostrarBiblioteca(RepositorioVideojuego repo, Persona personaActiva) {
-        Scanner reader = new Scanner(System.in);
+    public void mostrarBiblioteca() {
+
         if (repo.contarPorPersona(personaActiva.getId()) == 0) {
             System.out.println("La biblioteca está vacía.");
             return;
@@ -214,7 +217,7 @@ public class Funciones {
                     for (Videojuego v : repo.listarPorPersona(personaActiva.getId())) {
                         System.out.println("ID: " + v.getId() + "; título: " + v.getTitulo() +
                                 ", categoría: " + v.getCategoria() + ", plataforma: " + v.getPlataforma() +
-                                ", año: " + v.getAño() + "; idPersona: " + v.getIdPersona());
+                                ", año: " + v.getAño());
                     }
                     System.out.println();
                 }
@@ -223,11 +226,12 @@ public class Funciones {
                     System.out.println("Tienes " + cuenta + " juegos.\n");
                 }
                 case 3 -> {
-                    System.out.println("IDs disponibles en tu cuenta:");
+                    System.out.println("IDs disponibles:");
                     for (Videojuego v : repo.listarPorPersona(personaActiva.getId())) {
-                        System.out.println("ID: " + v.getId() + " - " + v.getTitulo() + "\n");
+                        System.out.println("ID: " + v.getId() + " - " + v.getTitulo());
                     }
-                    System.out.print("Introduce el ID del juego que quieres mostrar: ");
+
+                    System.out.print("Introduce un ID: ");
                     int id = reader.nextInt();
                     reader.nextLine();
 
@@ -238,11 +242,11 @@ public class Funciones {
                                 ", categoría: " + v.getCategoria() + ", plataforma: " + v.getPlataforma() +
                                 ", año: " + v.getAño() + "\n");
                     } else {
-                        System.out.println("No se encontró ningún videojuego con ese ID en tu cuenta. \n");
+                        System.out.println("ID no encontrado.\n");
                     }
                 }
                 case 4 -> {
-                    System.out.println("Retornando... \n");
+                    System.out.println("Retornando...\n");
                     return;
                 }
                 default -> System.out.println("Introduce un valor correcto...");
@@ -250,5 +254,3 @@ public class Funciones {
         }
     }
 }
-
-
