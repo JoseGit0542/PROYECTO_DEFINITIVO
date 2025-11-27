@@ -64,9 +64,7 @@ public class RepositorioPersona {
         guardar();
     }
 
-    // -------------------------
-    // Gestión de ficheros (CSV)
-    // -------------------------
+
     public void cargarDesdeArchivo() {
         if (archivo == null || !archivo.exists()) {
             System.out.println("Archivo de personas no encontrado. Se creará uno nuevo al guardar.");
@@ -125,15 +123,15 @@ public class RepositorioPersona {
             try {
                 int opcion = reader.nextInt();
                 reader.nextLine();
-
+                int id = 0;
                 switch (opcion) {
                     case 1 -> {
                         System.out.print("Introduce tu nombre: ");
                         String nombre = reader.nextLine().trim();
                         if (!nombre.isEmpty()) {
                             Persona nuevo = new Persona(nombre);
-                            rp.save(nuevo); // guardado automático
-                            actual = nuevo; // inicia sesión con el usuario creado
+                            rp.save(nuevo);
+                            actual = nuevo;
                             System.out.println("Usuario creado con ID: " + nuevo.getId());
                         } else {
                             System.out.println("Nombre inválido.");
@@ -152,7 +150,15 @@ public class RepositorioPersona {
 
                         System.out.println("");
                         System.out.print("Introduce tu ID: ");
-                        int id = reader.nextInt();
+
+                        try {
+
+                            id = reader.nextInt();
+
+                        }catch(InputMismatchException e) {
+                            System.out.println("Debes de introducir un tipo correcto.");
+                        }
+
                         reader.nextLine();
 
                         if (rp.existsById(id)) {

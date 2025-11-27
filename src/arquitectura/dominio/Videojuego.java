@@ -29,14 +29,6 @@ public class Videojuego {
         this.idPersona = idPersona;
     }
 
-    public Videojuego(String titulo) {
-        this.id = RepositorioVideojuego.generarId();
-        this.titulo = titulo;
-        this.categoria = null;
-        this.plataforma = null;
-        this.año = 0;
-        this.idPersona = 0;
-    }
 
     public int getId() {
         return id;
