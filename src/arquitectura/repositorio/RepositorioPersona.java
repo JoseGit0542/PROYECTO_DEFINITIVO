@@ -39,7 +39,7 @@ public class RepositorioPersona {
         if (p.getId() <= 0) p.setId(generarId());
         else if (p.getId() > contadorId) contadorId = p.getId();
         lista.put(p.getId(), p);
-        guardar(); // guardado automático
+        guardar();
     }
 
     public Persona findById(int id) {
@@ -64,9 +64,6 @@ public class RepositorioPersona {
         guardar();
     }
 
-    // -------------------------
-    // Gestión de ficheros (CSV)
-    // -------------------------
     public void cargarDesdeArchivo() {
         if (archivo == null || !archivo.exists()) {
             System.out.println("Archivo de personas no encontrado. Se creará uno nuevo al guardar.");
@@ -132,8 +129,8 @@ public class RepositorioPersona {
                         String nombre = reader.nextLine().trim();
                         if (!nombre.isEmpty()) {
                             Persona nuevo = new Persona(nombre);
-                            rp.save(nuevo); // guardado automático
-                            actual = nuevo; // inicia sesión con el usuario creado
+                            rp.save(nuevo);
+                            actual = nuevo;
                             System.out.println("Usuario creado con ID: " + nuevo.getId());
                         } else {
                             System.out.println("Nombre inválido.");

@@ -78,9 +78,6 @@ public class RepositorioVideojuego implements IRepositorioExtend<Videojuego, Int
         return lista.isEmpty() ? 1 : Collections.max(lista.keySet()) + 1;
     }
 
-    // -------------------------
-    // Métodos de dominio útiles
-    // -------------------------
     public List<Videojuego> listarPorPersona(int idPersona) {
         List<Videojuego> propios = new ArrayList<>();
         for (Videojuego v : lista.values()) {
@@ -108,9 +105,6 @@ public class RepositorioVideojuego implements IRepositorioExtend<Videojuego, Int
         guardar(); // guardado automático
     }
 
-    // -------------------------
-    // Gestión de ficheros (CSV)
-    // -------------------------
     public void guardarEnArchivo() {
         if (archivo == null) return;
         try (BufferedWriter bw = new BufferedWriter(new FileWriter(archivo))) {
