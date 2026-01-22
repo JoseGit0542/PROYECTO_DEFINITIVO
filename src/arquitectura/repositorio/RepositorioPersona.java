@@ -9,7 +9,7 @@ public class RepositorioPersona {
 
     private static int contadorId = 0;
     private final Map<Integer, Persona> lista = new HashMap<>();
-    private File archivo; // archivo asociado al repositorio
+    private File archivo;
 
     public RepositorioPersona() {}
 
@@ -27,10 +27,6 @@ public class RepositorioPersona {
         if (archivo != null) guardarEnArchivo();
     }
 
-    public Map<Integer, Persona> getLista() {
-        return lista;
-    }
-
     public static int generarId() {
         return ++contadorId;
     }
@@ -39,7 +35,7 @@ public class RepositorioPersona {
         if (p.getId() <= 0) p.setId(generarId());
         else if (p.getId() > contadorId) contadorId = p.getId();
         lista.put(p.getId(), p);
-        guardar(); // guardado automático
+        guardar();
     }
 
     public Persona findById(int id) {
@@ -64,12 +60,19 @@ public class RepositorioPersona {
         guardar();
     }
 
+    public void deletePersonaConJuegos(int idPersona, RepositorioVideojuego repoVideojuego) {
+        if (!lista.containsKey(idPersona)) {
+            throw new IllegalArgumentException("La persona no existe");
+        }
+
+        repoVideojuego.eliminarBibliotecaDePersona(idPersona);
+        lista.remove(idPersona);
+        guardar();
+    }
 
     public void cargarDesdeArchivo() {
-        if (archivo == null || !archivo.exists()) {
-            System.out.println("Archivo de personas no encontrado. Se creará uno nuevo al guardar.");
-            return;
-        }
+        if (archivo == null || !archivo.exists()) return;
+
         try (BufferedReader br = new BufferedReader(new FileReader(archivo))) {
             lista.clear();
             String linea;
@@ -88,7 +91,7 @@ public class RepositorioPersona {
                 if (id > contadorId) contadorId = id;
             }
         } catch (IOException e) {
-            System.err.println("Error al leer personas.csv: " + e.getMessage());
+            System.err.println("Error leyendo archivo personas.csv: " + e.getMessage());
         }
     }
 
@@ -106,10 +109,9 @@ public class RepositorioPersona {
 
     public int count() {
         return lista.size();
-
     }
-    // Login mejorado: crear o iniciar sesión con cualquier usuario
-    public static Persona login( RepositorioPersona rp) {
+
+    public static Persona login(RepositorioPersona rp) {
         Scanner reader = new Scanner(System.in);
         Persona actual = null;
 
@@ -118,12 +120,12 @@ public class RepositorioPersona {
             System.out.println("1. Crear nuevo usuario");
             System.out.println("2. Iniciar sesión con usuario existente");
             System.out.print("Elige una opción: ");
-            System.out.println("");
 
             try {
                 int opcion = reader.nextInt();
                 reader.nextLine();
-                int id = 0;
+                int id;
+
                 switch (opcion) {
                     case 1 -> {
                         System.out.print("Introduce tu nombre: ");
@@ -148,18 +150,15 @@ public class RepositorioPersona {
                             System.out.println(p.getId() + " - " + p.getNombre());
                         }
 
-                        System.out.println("");
                         System.out.print("Introduce tu ID: ");
-
                         try {
-
                             id = reader.nextInt();
-
-                        }catch(InputMismatchException e) {
-                            System.out.println("Debes de introducir un tipo correcto.");
+                            reader.nextLine();
+                        } catch (InputMismatchException e) {
+                            System.out.println("Debes introducir un número válido.");
+                            reader.nextLine();
+                            break;
                         }
-
-                        reader.nextLine();
 
                         if (rp.existsById(id)) {
                             actual = rp.findById(id);
@@ -170,13 +169,11 @@ public class RepositorioPersona {
                     }
                     default -> System.out.println("Opción incorrecta.");
                 }
-
-            } catch (InputMismatchException ime) {
+            } catch (InputMismatchException e) {
                 System.out.println("Introduce un número válido.");
                 reader.nextLine();
             }
         }
-
         return actual;
     }
 }

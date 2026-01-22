@@ -16,15 +16,22 @@ public class Main {
         File archivoVideojuegos = new File("videojuegos.csv");
         File archivoPersonas = new File("personas.csv");
 
-        // Repositorios inicializados con sus archivos
+        // Repositorios
         RepositorioVideojuego rp = new RepositorioVideojuego(archivoVideojuegos);
         RepositorioPersona rpPersona = new RepositorioPersona(archivoPersonas);
+        RepositorioPlataforma rpPlataforma = new RepositorioPlataforma();
 
-        // Gestión de usuarios al comienzo del programa
+        // Login inicial
         Persona personaActiva = RepositorioPersona.login(rpPersona);
 
-        // Creamos objeto Funciones con variables internas
-        Funciones funciones = new Funciones(reader, rp, rpPersona, personaActiva);
+        // Funciones (constructor actualizado)
+        Funciones funciones = new Funciones(
+                reader,
+                rp,
+                rpPersona,
+                rpPlataforma,
+                personaActiva
+        );
 
         boolean estado = true;
 
@@ -46,14 +53,27 @@ public class Main {
                             case 2 -> funciones.eliminarVideojuegoId();
                             case 3 -> funciones.eliminarBiblioteca();
                             case 4 -> funciones.editarBiblioteca();
-                            case 5 -> System.out.println("Retornando... \n");
+                            case 5 -> System.out.println("Retornando...\n");
                             default -> System.out.println("Introduce un valor correcto");
                         }
                     }
                     case 2 -> funciones.mostrarBiblioteca();
                     case 3 -> {
-                        personaActiva = rpPersona.login(rpPersona);
-                        funciones.setPersonaActiva(personaActiva);
+                        // Menu de usuario
+                        System.out.println("1: Cambiar usuario actual");
+                        System.out.println("2: Eliminar usuario");
+                        System.out.print("Elige una opción: ");
+                        int opcionUsuario = reader.nextInt();
+                        reader.nextLine();
+
+                        switch (opcionUsuario) {
+                            case 1 -> {
+                                personaActiva = rpPersona.login(rpPersona);
+                                funciones.setPersonaActiva(personaActiva);
+                            }
+                            case 2 -> funciones.eliminarPersona();
+                            default -> System.out.println("Opción incorrecta.");
+                        }
                     }
                     case 0 -> {
                         System.out.println("Saliendo del programa...");
@@ -63,15 +83,14 @@ public class Main {
                 }
 
             } catch (InputMismatchException e) {
-                System.out.println("Introduce un valor correcto. \n");
-                reader.next();
+                System.out.println("Introduce un valor correcto.\n");
+                reader.nextLine();
             } catch (IllegalArgumentException e) {
-                System.out.println("Introduce un argumento correcto. \n");
-                reader.next();
+                System.out.println("Introduce un argumento correcto.\n");
+                reader.nextLine();
             }
         } while (estado);
 
-        // No es necesario guardar manualmente; repositorios lo hacen automáticamente
         reader.close();
     }
 }
