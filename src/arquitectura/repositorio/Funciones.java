@@ -252,56 +252,42 @@ public class Funciones {
         }
     }
 
-    //mostrar biblioteca
+    //mostrar biblioteca corregido para no pedir numero doble
     public void mostrarBiblioteca() {
-        List<Videojuego> propios = repo.listarPorPersona(personaActiva.getId());
-
-        if (propios.isEmpty()) {
-            System.out.println("La biblioteca está vacía.\n");
-            return;
-        }
-
         while (true) {
+            List<Videojuego> propios = repo.listarPorPersona(personaActiva.getId());
             Menus.menuMostrar();
             int opcion = reader.nextInt();
             reader.nextLine();
 
             switch (opcion) {
                 case 1 -> {
-                    for (Videojuego v : propios) {
-                        Plataforma p = repoPlataforma.findById(v.getIdPlataforma());
-                        System.out.println(
-                                "ID: " + v.getId() +
-                                        ", título: " + v.getTitulo() +
-                                        ", categoría: " + v.getCategoria() +
-                                        ", plataforma: " + p.getNombre() +
-                                        ", año: " + v.getAño()
-                        );
-                    }
-                    System.out.println();
-                }
-                case 2 -> System.out.println("Tienes " + propios.size() + " juegos.\n");
-                case 3 -> {
-                    System.out.print("Introduce un ID: ");
-                    int id = reader.nextInt();
-                    reader.nextLine();
-
-                    Videojuego v = propios.stream()
-                            .filter(j -> j.getId() == id)
-                            .findFirst()
-                            .orElse(null);
-
-                    if (v != null) {
-                        Plataforma p = repoPlataforma.findById(v.getIdPlataforma());
-                        System.out.println(
-                                "ID: " + v.getId() +
-                                        ", título: " + v.getTitulo() +
-                                        ", categoría: " + v.getCategoria() +
-                                        ", plataforma: " + p.getNombre() +
-                                        ", año: " + v.getAño() + "\n"
-                        );
+                    if (propios.isEmpty()) {
+                        System.out.println("La biblioteca está vacía.\n");
                     } else {
-                        System.out.println("ID no encontrado.\n");
+                        for (Videojuego v : propios) {
+                            Plataforma p = repoPlataforma.findById(v.getIdPlataforma());
+                            System.out.println("ID: " + v.getId() + ", título: " + v.getTitulo() +
+                                    ", categoría: " + v.getCategoria() + ", plataforma: " + p.getNombre() + ", año: " + v.getAño());
+                        }
+                    }
+                }
+                case 2 -> System.out.println("Tienes " + repo.contarPorPersona(personaActiva.getId()) + " juegos.\n");
+                case 3 -> {
+                    //submenu de funciones de ordenacion y filtros
+                    boolean volverOrden = false;
+                    while (!volverOrden) {
+                        Menus.opcionesOrdenacion();
+                        int opOrden = reader.nextInt();
+                        reader.nextLine();
+                        switch (opOrden) {
+                            case 1 -> mostrarPorCategoriaOrdenado();
+                            case 2 -> mostrarTitulosOrdenados();
+                            case 3 -> mostrarPorPlataforma();
+                            case 4 -> existeJuegoPorTitulo();
+                            case 5 -> volverOrden = true;
+                            default -> System.out.println("Opción no válida.");
+                        }
                     }
                 }
                 case 4 -> {
@@ -432,7 +418,7 @@ public class Funciones {
     }
 
     // Menú de gestión de biblioteca
-    private void menuGestionBiblioteca() {
+    public void menuGestionBiblioteca() {
         boolean atras = false;
 
         while (!atras) {
