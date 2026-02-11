@@ -227,15 +227,18 @@ public class Funciones {
                     case "titulo" -> {
                         System.out.print("Nuevo título: ");
                         v.setTitulo(reader.nextLine());
+                        repo.save(v);
                     }
                     case "categoria" -> {
                         System.out.print("Nueva categoría: ");
                         v.setCategoria(reader.nextLine());
+                        repo.save(v);
                     }
                     case "año" -> {
                         System.out.print("Nuevo año: ");
                         v.setAño(reader.nextInt());
                         reader.nextLine();
+                        repo.save(v);
                     }
                     case "salir" -> System.out.println("Retornando...\n");
                     default -> System.out.println("Opción no válida.\n");

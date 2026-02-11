@@ -1,95 +1,77 @@
 package arquitectura.App;
 
+import arquitectura.conexion.Database;
 import arquitectura.dominio.Persona;
 import arquitectura.repositorio.*;
 
-import java.io.File;
+import java.sql.SQLException;
 import java.util.Scanner;
-import java.util.InputMismatchException;
 
 public class Main {
-    public static void main(String[] args) {
+
+    public static void main(String[] args) throws SQLException {
+
+        // Inicializa la BD y crea tablas
+        Database.getConnection();
 
         Scanner reader = new Scanner(System.in);
 
-        // Archivos CSV
-        File archivoVideojuegos = new File("videojuegos.csv");
-        File archivoPersonas = new File("personas.csv");
+        // Repositorios SQL
+        RepositorioPersona repoPersona = new RepositorioPersona();
+        RepositorioVideojuego repoVideojuego = new RepositorioVideojuego();
+        RepositorioPlataforma repoPlataforma = new RepositorioPlataforma();
 
-        // Repositorios
-        RepositorioVideojuego rp = new RepositorioVideojuego(archivoVideojuegos);
-        RepositorioPersona rpPersona = new RepositorioPersona(archivoPersonas);
-        RepositorioPlataforma rpPlataforma = new RepositorioPlataforma();
+        // Login
+        Persona personaActiva = RepositorioPersona.login(repoPersona);
 
-        // Login inicial
-        Persona personaActiva = RepositorioPersona.login(rpPersona);
-
-        // Funciones (constructor actualizado)
+        // Funciones del programa
         Funciones funciones = new Funciones(
                 reader,
-                rp,
-                rpPersona,
-                rpPlataforma,
+                repoVideojuego,
+                repoPersona,
+                repoPlataforma,
                 personaActiva
         );
 
-        boolean estado = true;
+        // Menú principal
+        boolean salir = false;
 
-        do {
-            try {
-                Menus.menu1();
-                int respuesta1 = reader.nextInt();
-                reader.nextLine();
-                System.out.println();
+        while (!salir) {
+            Menus.menu1();
+            int opcion = reader.nextInt();
+            reader.nextLine();
 
-                switch (respuesta1) {
-                    case 1 -> {
+            switch (opcion) {
+                case 1 -> { // Gestionar biblioteca
+                    boolean volver = false;
+                    while (!volver) {
                         Menus.menuGestion();
-                        int respuesta2 = reader.nextInt();
+                        int op = reader.nextInt();
                         reader.nextLine();
 
-                        switch (respuesta2) {
+                        switch (op) {
                             case 1 -> funciones.crearVideojuegoCase();
                             case 2 -> funciones.eliminarVideojuegoId();
                             case 3 -> funciones.eliminarBiblioteca();
                             case 4 -> funciones.editarBiblioteca();
-                            case 5 -> System.out.println("Retornando...\n");
-                            default -> System.out.println("Introduce un valor correcto");
+                            case 5 -> volver = true;
+                            default -> System.out.println("Opción no válida.\n");
                         }
                     }
-                    case 2 -> funciones.mostrarBiblioteca();
-                    case 3 -> {
-                        // Menu de usuario
-                        System.out.println("1: Cambiar usuario actual");
-                        System.out.println("2: Eliminar usuario");
-                        System.out.print("Elige una opción: ");
-                        int opcionUsuario = reader.nextInt();
-                        reader.nextLine();
-
-                        switch (opcionUsuario) {
-                            case 1 -> {
-                                personaActiva = rpPersona.login(rpPersona);
-                                funciones.setPersonaActiva(personaActiva);
-                            }
-                            case 2 -> funciones.eliminarPersona();
-                            default -> System.out.println("Opción incorrecta.");
-                        }
-                    }
-                    case 0 -> {
-                        System.out.println("Saliendo del programa...");
-                        estado = false;
-                    }
-                    default -> System.out.println("Vuelve a introducir un valor.");
                 }
 
-            } catch (InputMismatchException e) {
-                System.out.println("Introduce un valor correcto.\n");
-                reader.nextLine();
-            } catch (IllegalArgumentException e) {
-                System.out.println("Introduce un argumento correcto.\n");
-                reader.nextLine();
+                case 2 -> funciones.mostrarBiblioteca();
+
+                case 3 -> funciones.eliminarPersona();
+
+                case 0 -> {
+                    salir = true;
+                    System.out.println("Saliendo del programa...");
+                }
+
+                default -> System.out.println("Opción no válida.\n");
             }
-        } while (estado);
+        }
 
         reader.close();
     }

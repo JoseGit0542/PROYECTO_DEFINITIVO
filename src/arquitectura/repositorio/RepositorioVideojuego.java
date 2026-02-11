@@ -1,128 +1,218 @@
 package arquitectura.repositorio;
 
+import arquitectura.conexion.Database;
 import arquitectura.dominio.Videojuego;
 
-import java.io.*;
+import java.sql.*;
 import java.util.*;
 
 public class RepositorioVideojuego {
 
-    private static final Map<Integer, Videojuego> lista = new HashMap<>();
-    private File archivo;
-
     public RepositorioVideojuego() {}
 
-    public RepositorioVideojuego(File archivo) {
-        this.archivo = archivo;
-        cargarDesdeArchivo();
-    }
-
-    public void setArchivo(File archivo) {
-        this.archivo = archivo;
-        cargarDesdeArchivo();
-    }
-
-    private void guardar() {
-        if (archivo != null) guardarEnArchivo();
-    }
-
-    public long count() {
-        return lista.size();
-    }
-
-    public void deleteById(Integer id) {
-        lista.remove(id);
-        guardar();
-    }
-
-    public void deleteAll() {
-        lista.clear();
-        guardar();
-    }
-
-    public boolean existsById(Integer id) {
-        if (id == null) throw new IllegalArgumentException("El id no debe ser nulo");
-        return lista.containsKey(id);
-    }
-
-    public Videojuego findById(Integer id) {
-        if (id == null) throw new IllegalArgumentException("El id no debe ser nulo");
-        return lista.get(id);
-    }
-
-    public List<Videojuego> findAll() {
-        return new ArrayList<>(lista.values());
-    }
-
+    // ---------------------- SAVE ----------------------
     public <S extends Videojuego> S save(S entity) {
-        if (entity == null) throw new IllegalArgumentException("entity no debe ser nulo");
-        if (entity.getId() <= 0) entity.setId(generarId());
-        lista.put(entity.getId(), entity);
-        guardar();
+        if (entity.getId() == 0) {
+            insertar(entity);
+        } else {
+            actualizar(entity);
+        }
         return entity;
     }
 
-    public static int generarId() {
-        return lista.isEmpty() ? 1 : Collections.max(lista.keySet()) + 1;
+    private void insertar(Videojuego v) {
+        String sql = "INSERT INTO Videojuego (titulo, categoria, año, idPersona, idPlataforma) VALUES (?, ?, ?, ?, ?)";
+
+        try (Connection conn = Database.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+
+            stmt.setString(1, v.getTitulo());
+            stmt.setString(2, v.getCategoria());
+            stmt.setInt(3, v.getAño());
+            stmt.setInt(4, v.getIdPersona());
+            stmt.setInt(5, v.getIdPlataforma());
+
+            stmt.executeUpdate();
+
+            ResultSet rs = stmt.getGeneratedKeys();
+            if (rs.next()) {
+                v.setId(rs.getInt(1));
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
+    private void actualizar(Videojuego v) {
+        String sql = "UPDATE Videojuego SET titulo = ?, categoria = ?, año = ?, idPersona = ?, idPlataforma = ? WHERE id = ?";
+
+        try (Connection conn = Database.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, v.getTitulo());
+            stmt.setString(2, v.getCategoria());
+            stmt.setInt(3, v.getAño());
+            stmt.setInt(4, v.getIdPersona());
+            stmt.setInt(5, v.getIdPlataforma());
+            stmt.setInt(6, v.getId());
+
+            stmt.executeUpdate();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    // ---------------------- FIND BY ID ----------------------
+    public Videojuego findById(Integer id) {
+        String sql = "SELECT * FROM Videojuego WHERE id = ?";
+
+        try (Connection conn = Database.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, id);
+            ResultSet rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                return new Videojuego(
+                        rs.getInt(1),      // id
+                        rs.getString(2),   // titulo
+                        rs.getString(3),   // categoria
+                        rs.getInt(4),      // año
+                        rs.getInt(5),      // idPersona
+                        rs.getInt(6)       // idPlataforma
+                );
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
+    // ---------------------- EXISTS ----------------------
+    public boolean existsById(Integer id) {
+        return findById(id) != null;
+    }
+
+    // ---------------------- FIND ALL ----------------------
+    public List<Videojuego> findAll() {
+        List<Videojuego> lista = new ArrayList<>();
+        String sql = "SELECT * FROM Videojuego";
+
+        try (Connection conn = Database.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+
+            while (rs.next()) {
+                lista.add(new Videojuego(
+                        rs.getInt(1),
+                        rs.getString(2),
+                        rs.getString(3),
+                        rs.getInt(4),
+                        rs.getInt(5),
+                        rs.getInt(6)
+                ));
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return lista;
+    }
+
+    // ---------------------- DELETE BY ID ----------------------
+    public void deleteById(Integer id) {
+        String sql = "DELETE FROM Videojuego WHERE id = ?";
+
+        try (Connection conn = Database.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, id);
+            stmt.executeUpdate();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    // ---------------------- DELETE ALL ----------------------
+    public void deleteAll() {
+        String sql = "DELETE FROM Videojuego";
+
+        try (Connection conn = Database.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.executeUpdate();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    // ---------------------- LISTAR POR PERSONA ----------------------
     public List<Videojuego> listarPorPersona(int idPersona) {
-        List<Videojuego> propios = new ArrayList<>();
-        for (Videojuego v : lista.values()) {
-            if (v.getIdPersona() == idPersona) propios.add(v);
+        List<Videojuego> lista = new ArrayList<>();
+        String sql = "SELECT * FROM Videojuego WHERE idPersona = ?";
+
+        try (Connection conn = Database.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, idPersona);
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                lista.add(new Videojuego(
+                        rs.getInt(1),
+                        rs.getString(2),
+                        rs.getString(3),
+                        rs.getInt(4),
+                        rs.getInt(5),
+                        rs.getInt(6)
+                ));
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
-        return propios;
+
+        return lista;
     }
 
+    // ---------------------- CONTAR POR PERSONA ----------------------
     public long contarPorPersona(int idPersona) {
-        return listarPorPersona(idPersona).size();
-    }
+        String sql = "SELECT COUNT(*) FROM Videojuego WHERE idPersona = ?";
 
-    public void eliminarBibliotecaDePersona(int idPersona) {
-        lista.values().removeIf(v -> v.getIdPersona() == idPersona);
-        guardar();
-    }
+        try (Connection conn = Database.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
 
-    public void guardarEnArchivo() {
-        if (archivo == null) return;
-        try (BufferedWriter bw = new BufferedWriter(new FileWriter(archivo))) {
-            for (Videojuego v : lista.values()) {
-                bw.write(v.getId() + ";" +
-                        v.getTitulo() + ";" +
-                        v.getCategoria() + ";" +
-                        v.getIdPlataforma() + ";" +
-                        v.getAño() + ";" +
-                        v.getIdPersona());
-                bw.newLine();
-            }
-        } catch (IOException e) {
-            System.err.println("Error escribiendo archivo " + archivo.getName() + ": " + e.getMessage());
+            stmt.setInt(1, idPersona);
+            ResultSet rs = stmt.executeQuery();
+
+            if (rs.next()) return rs.getInt(1);
+
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
+
+        return 0;
     }
 
-    public void cargarDesdeArchivo() {
-        if (archivo == null || !archivo.exists()) return;
+    // ---------------------- ELIMINAR BIBLIOTECA ----------------------
+    public void eliminarBibliotecaDePersona(int idPersona) {
+        String sql = "DELETE FROM Videojuego WHERE idPersona = ?";
 
-        try (BufferedReader br = new BufferedReader(new FileReader(archivo))) {
-            lista.clear();
-            String linea;
-            while ((linea = br.readLine()) != null) {
-                if (linea.trim().isEmpty()) continue;
-                String[] datos = linea.split(";");
-                if (datos.length < 6) continue;
+        try (Connection conn = Database.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
 
-                int id = Integer.parseInt(datos[0].trim());
-                String titulo = datos[1].trim();
-                String categoria = datos[2].trim();
-                int idPlataforma = Integer.parseInt(datos[3].trim());
-                int anyo = Integer.parseInt(datos[4].trim());
-                int idPersona = Integer.parseInt(datos[5].trim());
+            stmt.setInt(1, idPersona);
+            stmt.executeUpdate();
 
-                Videojuego v = new Videojuego(id, titulo, categoria, anyo, idPersona, idPlataforma);
-                lista.put(id, v);
-            }
-        } catch (IOException e) {
-            System.err.println("Error leyendo archivo " + archivo.getName() + ": " + e.getMessage());
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
     }
 }

@@ -10,7 +10,6 @@ public class Plataforma {
         this.id = id;
         this.nombre = nombre;
     }
-
     // Getters y setters
     public int getId() {
         return id;

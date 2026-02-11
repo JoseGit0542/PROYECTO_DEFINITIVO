@@ -1,116 +1,165 @@
 package arquitectura.repositorio;
 
+import arquitectura.conexion.Database;
 import arquitectura.dominio.Persona;
+import arquitectura.dominio.Videojuego;
 
-import java.io.*;
+import java.sql.*;
 import java.util.*;
 
 public class RepositorioPersona {
 
-    private static int contadorId = 0;
-    private final Map<Integer, Persona> lista = new HashMap<>();
-    private File archivo;
-
     public RepositorioPersona() {}
 
-    public RepositorioPersona(File archivo) {
-        this.archivo = archivo;
-        cargarDesdeArchivo();
-    }
-
-    public void setArchivo(File archivo) {
-        this.archivo = archivo;
-        cargarDesdeArchivo();
-    }
-
-    private void guardar() {
-        if (archivo != null) guardarEnArchivo();
-    }
-
-    public static int generarId() {
-        return ++contadorId;
-    }
-
+    // ---------------------- SAVE ----------------------
     public void save(Persona p) {
-        if (p.getId() <= 0) p.setId(generarId());
-        else if (p.getId() > contadorId) contadorId = p.getId();
-        lista.put(p.getId(), p);
-        guardar();
-    }
-
-    public Persona findById(int id) {
-        return lista.get(id);
-    }
-
-    public boolean existsById(int id) {
-        return lista.containsKey(id);
-    }
-
-    public List<Persona> findAll() {
-        return new ArrayList<>(lista.values());
-    }
-
-    public void deleteAll() {
-        lista.clear();
-        guardar();
-    }
-
-    public void deleteById(int id) {
-        lista.remove(id);
-        guardar();
-    }
-
-    public void deletePersonaConJuegos(int idPersona, RepositorioVideojuego repoVideojuego) {
-        if (!lista.containsKey(idPersona)) {
-            throw new IllegalArgumentException("La persona no existe");
+        if (p.getId() == 0) {
+            insertar(p);
+        } else {
+            actualizar(p);
         }
+    }
+
+    private void insertar(Persona p) {
+        String sql = "INSERT INTO Persona (nombre) VALUES (?)";
+
+        try (Connection conn = Database.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+
+            stmt.setString(1, p.getNombre());
+            stmt.executeUpdate();
+
+            ResultSet rs = stmt.getGeneratedKeys();
+            if (rs.next()) {
+                p.setId(rs.getInt(1));
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void actualizar(Persona p) {
+        String sql = "UPDATE Persona SET nombre = ? WHERE id = ?";
+
+        try (Connection conn = Database.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, p.getNombre());
+            stmt.setInt(2, p.getId());
+            stmt.executeUpdate();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    // ---------------------- FIND BY ID ----------------------
+    public Persona findById(int id) {
+        String sql = "SELECT * FROM Persona WHERE id = ?";
+
+        try (Connection conn = Database.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, id);
+            ResultSet rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                return new Persona(
+                        rs.getInt("id"),
+                        rs.getString("nombre")
+                );
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    // ---------------------- EXISTS ----------------------
+    public boolean existsById(int id) {
+        return findById(id) != null;
+    }
+
+    // ---------------------- FIND ALL ----------------------
+    public List<Persona> findAll() {
+        List<Persona> lista = new ArrayList<>();
+        String sql = "SELECT * FROM Persona";
+
+        try (Connection conn = Database.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+
+            while (rs.next()) {
+                lista.add(new Persona(
+                        rs.getInt("id"),
+                        rs.getString("nombre")
+                ));
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return lista;
+    }
+
+    // ---------------------- DELETE BY ID ----------------------
+    public void deleteById(int id) {
+        String sql = "DELETE FROM Persona WHERE id = ?";
+
+        try (Connection conn = Database.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, id);
+            stmt.executeUpdate();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    // ---------------------- DELETE ALL ----------------------
+    public void deleteAll() {
+        String sql = "DELETE FROM Persona";
+
+        try (Connection conn = Database.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.executeUpdate();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    // ---------------------- DELETE PERSONA + JUEGOS ----------------------
+    public void deletePersonaConJuegos(int idPersona, RepositorioVideojuego repoVideojuego) {
 
         repoVideojuego.eliminarBibliotecaDePersona(idPersona);
-        lista.remove(idPersona);
-        guardar();
+
+        deleteById(idPersona);
     }
 
-    public void cargarDesdeArchivo() {
-        if (archivo == null || !archivo.exists()) return;
-
-        try (BufferedReader br = new BufferedReader(new FileReader(archivo))) {
-            lista.clear();
-            String linea;
-            while ((linea = br.readLine()) != null) {
-                if (linea.trim().isEmpty()) continue;
-                String[] datos = linea.split(";");
-                if (datos.length < 2) continue;
-
-                int id = Integer.parseInt(datos[0].trim());
-                String nombre = datos[1].trim();
-
-                Persona p = new Persona(nombre);
-                p.setId(id);
-                lista.put(id, p);
-
-                if (id > contadorId) contadorId = id;
-            }
-        } catch (IOException e) {
-            System.err.println("Error leyendo archivo personas.csv: " + e.getMessage());
-        }
-    }
-
-    public void guardarEnArchivo() {
-        if (archivo == null) return;
-        try (BufferedWriter bw = new BufferedWriter(new FileWriter(archivo))) {
-            for (Persona p : lista.values()) {
-                bw.write(p.getId() + ";" + p.getNombre());
-                bw.newLine();
-            }
-        } catch (IOException e) {
-            System.err.println("Error escribiendo personas.csv: " + e.getMessage());
-        }
-    }
-
+    // ---------------------- COUNT ----------------------
     public int count() {
-        return lista.size();
+        String sql = "SELECT COUNT(*) FROM Persona";
+
+        try (Connection conn = Database.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+
+            if (rs.next()) return rs.getInt(1);
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return 0;
     }
 
+    // ---------------------- LOGIN ----------------------
     public static Persona login(RepositorioPersona rp) {
         Scanner reader = new Scanner(System.in);
         Persona actual = null;
@@ -124,12 +173,13 @@ public class RepositorioPersona {
             try {
                 int opcion = reader.nextInt();
                 reader.nextLine();
-                int id;
 
                 switch (opcion) {
+
                     case 1 -> {
                         System.out.print("Introduce tu nombre: ");
                         String nombre = reader.nextLine().trim();
+
                         if (!nombre.isEmpty()) {
                             Persona nuevo = new Persona(nombre);
                             rp.save(nuevo);
@@ -139,6 +189,7 @@ public class RepositorioPersona {
                             System.out.println("Nombre inválido.");
                         }
                     }
+
                     case 2 -> {
                         if (rp.count() == 0) {
                             System.out.println("No hay usuarios registrados. Crea uno primero.");
@@ -151,14 +202,8 @@ public class RepositorioPersona {
                         }
 
                         System.out.print("Introduce tu ID: ");
-                        try {
-                            id = reader.nextInt();
-                            reader.nextLine();
-                        } catch (InputMismatchException e) {
-                            System.out.println("Debes introducir un número válido.");
-                            reader.nextLine();
-                            break;
-                        }
+                        int id = reader.nextInt();
+                        reader.nextLine();
 
                         if (rp.existsById(id)) {
                             actual = rp.findById(id);
@@ -167,13 +212,16 @@ public class RepositorioPersona {
                             System.out.println("ID no encontrado. Intenta de nuevo.");
                         }
                     }
+
                     default -> System.out.println("Opción incorrecta.");
                 }
+
             } catch (InputMismatchException e) {
                 System.out.println("Introduce un número válido.");
                 reader.nextLine();
             }
         }
+
         return actual;
     }
 }

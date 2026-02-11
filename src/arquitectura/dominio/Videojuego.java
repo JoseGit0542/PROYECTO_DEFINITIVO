@@ -1,7 +1,5 @@
 package arquitectura.dominio;
 
-import arquitectura.repositorio.RepositorioVideojuego;
-
 public class Videojuego {
 
     private int id;
@@ -11,8 +9,8 @@ public class Videojuego {
     private int idPersona;
     private int idPlataforma;
 
+    // Constructor para crear nuevos videojuegos (sin ID)
     public Videojuego(String titulo, String categoria, int año, int idPersona, int idPlataforma) {
-        this.id = RepositorioVideojuego.generarId();
         this.titulo = titulo;
         this.categoria = categoria;
         this.año = año;
@@ -20,6 +18,7 @@ public class Videojuego {
         this.idPlataforma = idPlataforma;
     }
 
+    // Constructor para cargar desde BD
     public Videojuego(int id, String titulo, String categoria, int año, int idPersona, int idPlataforma) {
         this.id = id;
         this.titulo = titulo;
@@ -29,6 +28,7 @@ public class Videojuego {
         this.idPlataforma = idPlataforma;
     }
 
+    // Getters y setters
     public int getId() { return id; }
     public String getTitulo() { return titulo; }
     public String getCategoria() { return categoria; }

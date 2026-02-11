@@ -1,43 +1,30 @@
 package arquitectura.dominio;
 
-import arquitectura.repositorio.RepositorioPersona;
-
 public class Persona {
 
-    //atributos
     private int id;
     private String nombre;
 
-    //constructor
+    // Constructor para crear nuevas personas (sin ID)
     public Persona(String nombre) {
-        this.id = RepositorioPersona.generarId();
         this.nombre = nombre;
     }
 
-    //getters y setters
-    public void setId(int id) {
+    // Constructor para cargar desde BD
+    public Persona(int id, String nombre) {
         this.id = id;
-    }
-
-    public void setNombre(String nombre) {
         this.nombre = nombre;
     }
 
-    public int getId() {
-        return id;
-    }
+    // Getters y setters
+    public int getId() { return id; }
+    public String getNombre() { return nombre; }
 
-    public String getNombre() {
-        return nombre;
-    }
+    public void setId(int id) { this.id = id; }
+    public void setNombre(String nombre) { this.nombre = nombre; }
 
-
-    //metodo toString
+    @Override
     public String toString() {
-        return "ID: " + this.getId() + ", nombre: " + this.getNombre();
+        return "ID: " + id + ", nombre: " + nombre;
     }
-
-
-
 }
-
