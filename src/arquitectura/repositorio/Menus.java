@@ -3,7 +3,7 @@ package arquitectura.repositorio;
 public class Menus {
 
     public static void menu1() {
-        System.out.println("------BIBLIOTECA DE VIDEOJUEGOS------");
+        System.out.println("\n------BIBLIOTECA DE VIDEOJUEGOS------");
         System.out.println("1: Gestionar biblioteca");
         System.out.println("2: Mostrar biblioteca");
         System.out.println("3: Gestionar usuario");
@@ -12,7 +12,7 @@ public class Menus {
     }
 
     public static void menuGestion() {
-        System.out.println("------GESTIÓN DE BIBLIOTECA------");
+        System.out.println("\n------GESTIÓN DE BIBLIOTECA------");
         System.out.println("1: Añadir videojuego");
         System.out.println("2: Eliminar videojuego por ID");
         System.out.println("3: Eliminar todos los videojuegos");
@@ -20,9 +20,17 @@ public class Menus {
         System.out.println("5: Atrás");
         System.out.print("Elige una opción: ");
     }
+    public static void gestionarUsuario() {
+        System.out.println("\n------ GESTIÓN DE TU USUARIO ------");
+        System.out.println("1 - Editar mi usuario");
+        System.out.println("2 - Eliminar mi usuario");
+        System.out.println("3 - Cambiar de usuario (login)");
+        System.out.println("0 - Salir");
+        System.out.print("Elige una opción: ");
+    }
 
     public static void menuMostrar() {
-        System.out.println("-----MOSTRAR BIBLIOTECA-----");
+        System.out.println("\n-----MOSTRAR BIBLIOTECA-----");
         System.out.println("1: Mostrar lista de videojuegos");
         System.out.println("2: Mostrar cantidad de videojuegos");
         System.out.println("3: Mostrar videojuego con su nombre e identificador");
@@ -31,7 +39,7 @@ public class Menus {
     }
 
     public static void menuEditar() {
-        System.out.println("------MENÚ DE EDICIÓN------");
+        System.out.println("\n------MENÚ DE EDICIÓN------");
         System.out.println("Título");
         System.out.println("Categoría");
         System.out.println("Plataforma");

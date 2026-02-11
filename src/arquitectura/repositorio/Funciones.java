@@ -30,7 +30,7 @@ public class Funciones {
         this.personaActiva = personaActiva;
     }
 
-    // ---------------- CREAR VIDEOJUEGO ----------------
+    //crear videojuego
     public void crearVideojuego() {
         try {
             System.out.print("Introduce el título del videojuego: ");
@@ -70,6 +70,7 @@ public class Funciones {
         }
     }
 
+    //menu para crear videojuego
     public void crearVideojuegoCase() {
         boolean estado = true;
 
@@ -89,7 +90,7 @@ public class Funciones {
         } while (estado);
     }
 
-    // ---------------- ELIMINAR PERSONA ----------------
+    //eliminar persona
     public void eliminarPersona() {
         System.out.println("------ ELIMINAR USUARIO ------");
         System.out.println("Usuarios registrados:");
@@ -130,7 +131,7 @@ public class Funciones {
         }
     }
 
-    // ---------------- ELIMINAR VIDEOJUEGO ----------------
+    //eliminar videojuego por id
     public void eliminarVideojuegoId() {
         List<Videojuego> propios = repo.listarPorPersona(personaActiva.getId());
 
@@ -166,7 +167,7 @@ public class Funciones {
         }
     }
 
-    // ---------------- ELIMINAR BIBLIOTECA ----------------
+    //eliminar biblioteca completa
     public void eliminarBiblioteca() {
         List<Videojuego> propios = repo.listarPorPersona(personaActiva.getId());
 
@@ -186,7 +187,7 @@ public class Funciones {
         }
     }
 
-    // ---------------- EDITAR BIBLIOTECA ----------------
+    //editar biblioteca
     public void editarBiblioteca() {
         List<Videojuego> propios = repo.listarPorPersona(personaActiva.getId());
 
@@ -247,7 +248,7 @@ public class Funciones {
         }
     }
 
-    // ---------------- MOSTRAR BIBLIOTECA ----------------
+    //mostrar biblioteca
     public void mostrarBiblioteca() {
         List<Videojuego> propios = repo.listarPorPersona(personaActiva.getId());
 
@@ -306,5 +307,90 @@ public class Funciones {
                 default -> System.out.println("Opción no válida.\n");
             }
         }
+    }
+
+    //crear usuario
+    public void crearUsuario() {
+        System.out.print("Introduce el nombre del nuevo usuario: ");
+        String nombre = reader.nextLine().trim();
+
+        if (nombre.isEmpty()) {
+            System.out.println("Nombre inválido.\n");
+            return;
+        }
+
+        Persona nuevo = new Persona(nombre);
+        repoPersona.save(nuevo);
+        System.out.println("Usuario creado con ID: " + nuevo.getId() + "\n");
+    }
+
+    //gestionar usuario activo
+    public void gestionarUsuarioActivo() {
+        if (personaActiva == null) {
+            System.out.println("No hay usuario activo. Debes iniciar sesión primero.\n");
+            return;
+        }
+
+        boolean salir = false;
+
+        while (!salir) {
+            Menus.gestionarUsuario();
+
+            String linea = reader.nextLine().trim();
+            if (linea.isEmpty()) {
+                System.out.println("Debes introducir un número válido.\n");
+                continue;
+            }
+
+            int opcion;
+            try {
+                opcion = Integer.parseInt(linea);
+            } catch (NumberFormatException e) {
+                System.out.println("Debes introducir un número válido.\n");
+                continue;
+            }
+
+            switch (opcion) {
+                case 1 -> editarUsuarioActivo();
+                case 2 -> eliminarUsuarioActivo();
+                case 3 -> cambiarUsuario();
+                case 0 -> salir = true;
+                default -> System.out.println("Opción no válida.\n");
+            }
+        }
+    }
+
+    //editar usuario activo
+    private void editarUsuarioActivo() {
+        System.out.print("Introduce tu nuevo nombre: ");
+        String nuevoNombre = reader.nextLine().trim();
+
+        if (!nuevoNombre.isEmpty()) {
+            personaActiva.setNombre(nuevoNombre);
+            repoPersona.save(personaActiva);
+            System.out.println("Nombre actualizado correctamente.\n");
+        } else {
+            System.out.println("Nombre inválido, operación cancelada.\n");
+        }
+    }
+
+    //eliminar usuario activo
+    private void eliminarUsuarioActivo() {
+        System.out.print("¿Seguro que deseas eliminar tu usuario y todos tus juegos? [si/no]: ");
+        String confirm = reader.nextLine().toLowerCase();
+
+        if (confirm.equals("si")) {
+            repoPersona.deletePersonaConJuegos(personaActiva.getId(), repo);
+            personaActiva = null;
+            System.out.println("Usuario eliminado correctamente. Debes iniciar sesión de nuevo.\n");
+        } else {
+            System.out.println("Operación cancelada.\n");
+        }
+    }
+
+    //cambiar de usuario
+    private void cambiarUsuario() {
+        System.out.println("---- Cambiar de usuario ----");
+        personaActiva = RepositorioPersona.login(repoPersona);
     }
 }

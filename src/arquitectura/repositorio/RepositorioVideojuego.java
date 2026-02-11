@@ -5,12 +5,14 @@ import arquitectura.dominio.Videojuego;
 
 import java.sql.*;
 import java.util.*;
+import java.util.stream.Collectors;
 
-public class RepositorioVideojuego {
+public class RepositorioVideojuego implements IRepositorioExtend<Videojuego, Integer> {
 
     public RepositorioVideojuego() {}
 
-    // ---------------------- SAVE ----------------------
+    //guardar o actualizar un videojuego
+    @Override
     public <S extends Videojuego> S save(S entity) {
         if (entity.getId() == 0) {
             insertar(entity);
@@ -20,6 +22,7 @@ public class RepositorioVideojuego {
         return entity;
     }
 
+    //insertar nuevo videojuego en la base de datos
     private void insertar(Videojuego v) {
         String sql = "INSERT INTO Videojuego (titulo, categoria, año, idPersona, idPlataforma) VALUES (?, ?, ?, ?, ?)";
 
@@ -44,6 +47,7 @@ public class RepositorioVideojuego {
         }
     }
 
+    //actualizar datos de un videojuego existente
     private void actualizar(Videojuego v) {
         String sql = "UPDATE Videojuego SET titulo = ?, categoria = ?, año = ?, idPersona = ?, idPlataforma = ? WHERE id = ?";
 
@@ -64,8 +68,11 @@ public class RepositorioVideojuego {
         }
     }
 
-    // ---------------------- FIND BY ID ----------------------
+    //buscar videojuego por id
+    @Override
     public Videojuego findById(Integer id) {
+        if (id == null) throw new IllegalArgumentException("ID no puede ser nulo");
+
         String sql = "SELECT * FROM Videojuego WHERE id = ?";
 
         try (Connection conn = Database.getConnection();
@@ -76,12 +83,12 @@ public class RepositorioVideojuego {
 
             if (rs.next()) {
                 return new Videojuego(
-                        rs.getInt(1),      // id
-                        rs.getString(2),   // titulo
-                        rs.getString(3),   // categoria
-                        rs.getInt(4),      // año
-                        rs.getInt(5),      // idPersona
-                        rs.getInt(6)       // idPlataforma
+                        rs.getInt("id"),
+                        rs.getString("titulo"),
+                        rs.getString("categoria"),
+                        rs.getInt("año"),
+                        rs.getInt("idPersona"),
+                        rs.getInt("idPlataforma")
                 );
             }
 
@@ -92,13 +99,27 @@ public class RepositorioVideojuego {
         return null;
     }
 
-    // ---------------------- EXISTS ----------------------
+    //buscar videojuego con optional
+    @Override
+    public Optional<Videojuego> findByIdOptional(Integer id) {
+        return Optional.ofNullable(findById(id));
+    }
+
+    //comprobar si un videojuego existe
+    @Override
     public boolean existsById(Integer id) {
         return findById(id) != null;
     }
 
-    // ---------------------- FIND ALL ----------------------
-    public List<Videojuego> findAll() {
+    //obtener todos los videojuegos
+    @Override
+    public Iterable<Videojuego> findAll() {
+        return findAllToList();
+    }
+
+    //listar todos los videojuegos en una lista
+    @Override
+    public List<Videojuego> findAllToList() {
         List<Videojuego> lista = new ArrayList<>();
         String sql = "SELECT * FROM Videojuego";
 
@@ -108,12 +129,12 @@ public class RepositorioVideojuego {
 
             while (rs.next()) {
                 lista.add(new Videojuego(
-                        rs.getInt(1),
-                        rs.getString(2),
-                        rs.getString(3),
-                        rs.getInt(4),
-                        rs.getInt(5),
-                        rs.getInt(6)
+                        rs.getInt("id"),
+                        rs.getString("titulo"),
+                        rs.getString("categoria"),
+                        rs.getInt("año"),
+                        rs.getInt("idPersona"),
+                        rs.getInt("idPlataforma")
                 ));
             }
 
@@ -124,8 +145,11 @@ public class RepositorioVideojuego {
         return lista;
     }
 
-    // ---------------------- DELETE BY ID ----------------------
+    //eliminar un videojuego por su id
+    @Override
     public void deleteById(Integer id) {
+        if (id == null) throw new IllegalArgumentException("ID no puede ser nulo");
+
         String sql = "DELETE FROM Videojuego WHERE id = ?";
 
         try (Connection conn = Database.getConnection();
@@ -139,7 +163,8 @@ public class RepositorioVideojuego {
         }
     }
 
-    // ---------------------- DELETE ALL ----------------------
+    //borrar todos los videojuegos de la tabla
+    @Override
     public void deleteAll() {
         String sql = "DELETE FROM Videojuego";
 
@@ -153,7 +178,25 @@ public class RepositorioVideojuego {
         }
     }
 
-    // ---------------------- LISTAR POR PERSONA ----------------------
+    //contar el total de videojuegos registrados
+    @Override
+    public long count() {
+        String sql = "SELECT COUNT(*) FROM Videojuego";
+
+        try (Connection conn = Database.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+
+            if (rs.next()) return rs.getLong(1);
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return 0;
+    }
+
+    //obtener lista de juegos de un usuario concreto
     public List<Videojuego> listarPorPersona(int idPersona) {
         List<Videojuego> lista = new ArrayList<>();
         String sql = "SELECT * FROM Videojuego WHERE idPersona = ?";
@@ -166,12 +209,12 @@ public class RepositorioVideojuego {
 
             while (rs.next()) {
                 lista.add(new Videojuego(
-                        rs.getInt(1),
-                        rs.getString(2),
-                        rs.getString(3),
-                        rs.getInt(4),
-                        rs.getInt(5),
-                        rs.getInt(6)
+                        rs.getInt("id"),
+                        rs.getString("titulo"),
+                        rs.getString("categoria"),
+                        rs.getInt("año"),
+                        rs.getInt("idPersona"),
+                        rs.getInt("idPlataforma")
                 ));
             }
 
@@ -182,7 +225,7 @@ public class RepositorioVideojuego {
         return lista;
     }
 
-    // ---------------------- CONTAR POR PERSONA ----------------------
+    //contar cuantos juegos tiene un usuario
     public long contarPorPersona(int idPersona) {
         String sql = "SELECT COUNT(*) FROM Videojuego WHERE idPersona = ?";
 
@@ -192,7 +235,7 @@ public class RepositorioVideojuego {
             stmt.setInt(1, idPersona);
             ResultSet rs = stmt.executeQuery();
 
-            if (rs.next()) return rs.getInt(1);
+            if (rs.next()) return rs.getLong(1);
 
         } catch (SQLException e) {
             e.printStackTrace();
@@ -201,7 +244,7 @@ public class RepositorioVideojuego {
         return 0;
     }
 
-    // ---------------------- ELIMINAR BIBLIOTECA ----------------------
+    //borrar todos los juegos de un usuario especifico
     public void eliminarBibliotecaDePersona(int idPersona) {
         String sql = "DELETE FROM Videojuego WHERE idPersona = ?";
 

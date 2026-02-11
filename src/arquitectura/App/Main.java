@@ -3,7 +3,6 @@ package arquitectura.App;
 import arquitectura.conexion.Database;
 import arquitectura.dominio.InicializadorPlataforma;
 import arquitectura.dominio.Persona;
-import arquitectura.dominio.Plataforma;
 import arquitectura.repositorio.*;
 
 import java.sql.SQLException;
@@ -13,22 +12,28 @@ public class Main {
 
     public static void main(String[] args) throws SQLException {
 
-        // Inicializa la BD y crea tablas
+        //inicializa la base de datos y crea tablas
         Database.getConnection();
 
+        //crea scanner para leer consola
         Scanner reader = new Scanner(System.in);
 
-        // Repositorios SQL
+        //repositorio de usuarios
         RepositorioPersona repoPersona = new RepositorioPersona();
+
+        //repositorio de videojuegos
         RepositorioVideojuego repoVideojuego = new RepositorioVideojuego();
+
+        //repositorio de plataformas
         RepositorioPlataforma repoPlataforma = new RepositorioPlataforma();
 
+        //inicializa plataformas iniciales
         InicializadorPlataforma.inicializar();
 
-        // Login
+        //login usuario activo
         Persona personaActiva = RepositorioPersona.login(repoPersona);
 
-        // Funciones del programa
+        //instancia funciones con repositorios y usuario activo
         Funciones funciones = new Funciones(
                 reader,
                 repoVideojuego,
@@ -37,18 +42,24 @@ public class Main {
                 personaActiva
         );
 
-        // Menú principal
+        //menu principal
         boolean salir = false;
 
         while (!salir) {
+
+            //muestra menu principal
             Menus.menu1();
             int opcion = reader.nextInt();
             reader.nextLine();
 
             switch (opcion) {
-                case 1 -> { // Gestionar biblioteca
+
+                //gestionar biblioteca
+                case 1 -> {
                     boolean volver = false;
                     while (!volver) {
+
+                        //menu de gestion de biblioteca
                         Menus.menuGestion();
                         int op = reader.nextInt();
                         reader.nextLine();
@@ -59,24 +70,28 @@ public class Main {
                             case 3 -> funciones.eliminarBiblioteca();
                             case 4 -> funciones.editarBiblioteca();
                             case 5 -> volver = true;
-                            default -> System.out.println("Opción no válida.\n");
+                            default -> System.out.println("Opcion no valida\n");
                         }
                     }
                 }
 
+                //mostrar biblioteca
                 case 2 -> funciones.mostrarBiblioteca();
 
-                case 3 -> funciones.eliminarPersona();
+                //gestionar usuario activo
+                case 3 -> funciones.gestionarUsuarioActivo();
 
+                //salir del programa
                 case 0 -> {
                     salir = true;
                     System.out.println("Saliendo del programa...");
                 }
 
-                default -> System.out.println("Opción no válida.\n");
+                default -> System.out.println("Opcion no valida\n");
             }
         }
 
+        //cierra scanner
         reader.close();
     }
 }
