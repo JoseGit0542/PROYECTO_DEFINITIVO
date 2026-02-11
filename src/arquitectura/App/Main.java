@@ -11,29 +11,17 @@ import java.util.Scanner;
 public class Main {
 
     public static void main(String[] args) throws SQLException {
-
-        //inicializa la base de datos y crea tablas
         Database.getConnection();
-
-        //crea scanner para leer consola
         Scanner reader = new Scanner(System.in);
 
-        //repositorio de usuarios
         RepositorioPersona repoPersona = new RepositorioPersona();
-
-        //repositorio de videojuegos
         RepositorioVideojuego repoVideojuego = new RepositorioVideojuego();
-
-        //repositorio de plataformas
         RepositorioPlataforma repoPlataforma = new RepositorioPlataforma();
 
-        //inicializa plataformas iniciales
         InicializadorPlataforma.inicializar();
 
-        //login usuario activo
         Persona personaActiva = RepositorioPersona.login(repoPersona);
 
-        //instancia funciones con repositorios y usuario activo
         Funciones funciones = new Funciones(
                 reader,
                 repoVideojuego,
@@ -42,24 +30,25 @@ public class Main {
                 personaActiva
         );
 
-        //menu principal
         boolean salir = false;
 
         while (!salir) {
+            // Re-login si el usuario activo fue borrado
+            if (funciones.getPersonaActiva() == null) {
+                System.out.println("Debes iniciar sesión nuevamente.");
+                personaActiva = RepositorioPersona.login(repoPersona);
+                funciones.setPersonaActiva(personaActiva);
+            }
 
-            //muestra menu principal
             Menus.menu1();
             int opcion = reader.nextInt();
             reader.nextLine();
 
             switch (opcion) {
-
-                //gestionar biblioteca
+                // 1: Gestionar biblioteca (según tu Menus.menu1)
                 case 1 -> {
                     boolean volver = false;
                     while (!volver) {
-
-                        //menu de gestion de biblioteca
                         Menus.menuGestion();
                         int op = reader.nextInt();
                         reader.nextLine();
@@ -69,29 +58,62 @@ public class Main {
                             case 2 -> funciones.eliminarVideojuegoId();
                             case 3 -> funciones.eliminarBiblioteca();
                             case 4 -> funciones.editarBiblioteca();
-                            case 5 -> volver = true;
-                            default -> System.out.println("Opcion no valida\n");
+                            case 5 -> volver = true; // Opción 5: Atrás en tu Menus
+                            default -> System.out.println("Opción no válida.\n");
                         }
                     }
                 }
 
-                //mostrar biblioteca
-                case 2 -> funciones.mostrarBiblioteca();
+                // 2: Mostrar biblioteca + Opciones de ordenación
+                case 2 -> {
+                    boolean volverMostrar = false;
+                    while (!volverMostrar) {
+                        Menus.menuMostrar();
+                        int opMostrar = reader.nextInt();
+                        reader.nextLine();
 
-                //gestionar usuario activo
-                case 3 -> funciones.gestionarUsuarioActivo();
+                        switch (opMostrar) {
+                            case 1 -> funciones.mostrarBiblioteca(); // Lista normal
+                            case 2 -> System.out.println("Total: " + repoVideojuego.contarPorPersona(personaActiva.getId()));
+                            case 3 -> {
+                                // Aquí llamamos al submenú de ordenación que pedías
+                                boolean volverOrden = false;
+                                while (!volverOrden) {
+                                    Menus.opcionesOrdenacion();
+                                    int opOrden = reader.nextInt();
+                                    reader.nextLine();
 
-                //salir del programa
+                                    switch (opOrden) {
+                                        case 1 -> funciones.mostrarPorCategoriaOrdenado();
+                                        case 2 -> funciones.mostrarTitulosOrdenados();
+                                        case 3 -> funciones.mostrarPorPlataforma();
+                                        case 4 -> funciones.existeJuegoPorTitulo();
+                                        case 5 -> volverOrden = true;
+                                        default -> System.out.println("Opción no válida.\n");
+                                    }
+                                }
+                            }
+                            case 4 -> volverMostrar = true; // Opción 4: Atrás en tu Menus
+                            default -> System.out.println("Opción no válida.\n");
+                        }
+                    }
+                }
+
+                // 3: Gestionar usuario
+                case 3 -> {
+                    funciones.gestionarUsuarioActivo();
+                    personaActiva = funciones.getPersonaActiva();
+                }
+
+                // 0: Salir
                 case 0 -> {
                     salir = true;
                     System.out.println("Saliendo del programa...");
                 }
 
-                default -> System.out.println("Opcion no valida\n");
+                default -> System.out.println("Opción no válida.\n");
             }
         }
-
-        //cierra scanner
         reader.close();
     }
 }

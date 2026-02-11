@@ -70,6 +70,10 @@ public class Funciones {
         }
     }
 
+    public Persona getPersonaActiva() {
+        return personaActiva;
+    }
+
     //menu para crear videojuego
     public void crearVideojuegoCase() {
         boolean estado = true;
@@ -393,4 +397,147 @@ public class Funciones {
         System.out.println("---- Cambiar de usuario ----");
         personaActiva = RepositorioPersona.login(repoPersona);
     }
+    // En Funciones.java
+    public void menuPrincipal() {
+        boolean salir = false;
+
+        while (!salir) {
+            Menus.menu1(); // Menú principal
+            String linea = reader.nextLine().trim();
+
+            if (linea.isEmpty()) {
+                System.out.println("Debes introducir un número válido.\n");
+                continue;
+            }
+
+            int opcion;
+            try {
+                opcion = Integer.parseInt(linea);
+            } catch (NumberFormatException e) {
+                System.out.println("Debes introducir un número válido.\n");
+                continue;
+            }
+
+            switch (opcion) {
+                case 1 -> menuGestionBiblioteca(); // Menú gestión de biblioteca
+                case 2 -> mostrarBiblioteca();     // Mostrar biblioteca
+                case 3 -> gestionarUsuarioActivo(); // Gestión de usuario
+                case 0 -> {
+                    salir = true;
+                    System.out.println("Saliendo del programa...");
+                }
+                default -> System.out.println("Opción no válida.\n");
+            }
+        }
+    }
+
+    // Menú de gestión de biblioteca
+    private void menuGestionBiblioteca() {
+        boolean atras = false;
+
+        while (!atras) {
+            Menus.menuGestion();
+            String linea = reader.nextLine().trim();
+
+            if (linea.isEmpty()) {
+                System.out.println("Debes introducir un número válido.\n");
+                continue;
+            }
+
+            int opcion;
+            try {
+                opcion = Integer.parseInt(linea);
+            } catch (NumberFormatException e) {
+                System.out.println("Debes introducir un número válido.\n");
+                continue;
+            }
+
+            switch (opcion) {
+                case 1 -> crearVideojuego();
+                case 2 -> eliminarVideojuegoId();
+                case 3 -> eliminarBiblioteca();
+                case 4 -> editarBiblioteca();
+                case 5 -> atras = true;
+                default -> System.out.println("Opción no válida.\n");
+            }
+        }
+    }
+    // FUNCIONES NUEVAS EN Funciones.java
+// Mostrar videojuegos de una categoría ordenados por año
+    public void mostrarPorCategoriaOrdenado() {
+        System.out.print("Introduce la categoría: ");
+        String categoria = reader.nextLine();
+
+        var lista = repo.listarPorCategoriaOrdenado(personaActiva.getId(), categoria);
+
+        if (lista.isEmpty()) {
+            System.out.println("No hay videojuegos en esa categoría.\n");
+            return;
+        }
+
+        System.out.println("Videojuegos de la categoría '" + categoria + "' ordenados por año:");
+        for (Videojuego v : lista) {
+            Plataforma p = repoPlataforma.findById(v.getIdPlataforma());
+            System.out.println(
+                    "ID: " + v.getId() +
+                            ", Título: " + v.getTitulo() +
+                            ", Plataforma: " + p.getNombre() +
+                            ", Año: " + v.getAño()
+            );
+        }
+        System.out.println();
+    }
+
+    // Mostrar todos los títulos ordenados alfabéticamente
+    public void mostrarTitulosOrdenados() {
+        var titulos = repo.obtenerTitulosOrdenados(personaActiva.getId());
+
+        if (titulos.isEmpty()) {
+            System.out.println("No tienes videojuegos registrados.\n");
+            return;
+        }
+
+        System.out.println("Títulos ordenados alfabéticamente:");
+        for (String t : titulos) {
+            System.out.println("- " + t);
+        }
+        System.out.println();
+    }
+
+    // Agrupar videojuegos por plataforma
+    public void mostrarPorPlataforma() {
+        var map = repo.agruparPorPlataforma(personaActiva.getId());
+
+        if (map.isEmpty()) {
+            System.out.println("No tienes videojuegos registrados.\n");
+            return;
+        }
+
+        System.out.println("Videojuegos agrupados por plataforma:");
+        for (Integer idPlataforma : map.keySet()) {
+            Plataforma p = repoPlataforma.findById(idPlataforma);
+            System.out.println("Plataforma: " + p.getNombre());
+            for (Videojuego v : map.get(idPlataforma)) {
+                System.out.println("  - " + v.getTitulo() + " (" + v.getAño() + ")");
+            }
+        }
+        System.out.println();
+    }
+
+    // Comprobar si existe un videojuego con un título concreto
+    public void existeJuegoPorTitulo() {
+        System.out.print("Introduce el título a buscar: ");
+        String titulo = reader.nextLine();
+
+        boolean existe = repo.existeJuegoConTitulo(personaActiva.getId(), titulo);
+
+        if (existe) {
+            System.out.println("Sí, existe un videojuego con el título '" + titulo + "'.\n");
+        } else {
+            System.out.println("No existe ningún videojuego con ese título.\n");
+        }
+    }
+
+
+
 }

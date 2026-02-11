@@ -227,21 +227,9 @@ public class RepositorioVideojuego implements IRepositorioExtend<Videojuego, Int
 
     //contar cuantos juegos tiene un usuario
     public long contarPorPersona(int idPersona) {
-        String sql = "SELECT COUNT(*) FROM Videojuego WHERE idPersona = ?";
-
-        try (Connection conn = Database.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-
-            stmt.setInt(1, idPersona);
-            ResultSet rs = stmt.executeQuery();
-
-            if (rs.next()) return rs.getLong(1);
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-        return 0;
+        return listarPorPersona(idPersona)
+                .stream()
+                .count();
     }
 
     //borrar todos los juegos de un usuario especifico
@@ -257,5 +245,37 @@ public class RepositorioVideojuego implements IRepositorioExtend<Videojuego, Int
         } catch (SQLException e) {
             e.printStackTrace();
         }
+    }
+
+    //listar videojuegos por categoria ordenados por año
+    public List<Videojuego> listarPorCategoriaOrdenado(int idPersona, String categoria) {
+        return listarPorPersona(idPersona)
+                .stream()
+                .filter(v -> v.getCategoria().equalsIgnoreCase(categoria))
+                .sorted(Comparator.comparing(Videojuego::getAño))
+                .collect(Collectors.toList());
+    }
+
+    //comprobar si existe un videojuego con un titulo concreto
+    public boolean existeJuegoConTitulo(int idPersona, String titulo) {
+        return listarPorPersona(idPersona)
+                .stream()
+                .anyMatch(v -> v.getTitulo().equalsIgnoreCase(titulo));
+    }
+
+    //agrupar videojuegos por plataforma
+    public Map<Integer, List<Videojuego>> agruparPorPlataforma(int idPersona) {
+        return listarPorPersona(idPersona)
+                .stream()
+                .collect(Collectors.groupingBy(Videojuego::getIdPlataforma));
+    }
+
+    //obtener lista de titulos ordenados alfabeticamente
+    public List<String> obtenerTitulosOrdenados(int idPersona) {
+        return listarPorPersona(idPersona)
+                .stream()
+                .map(Videojuego::getTitulo)
+                .sorted()
+                .collect(Collectors.toList());
     }
 }

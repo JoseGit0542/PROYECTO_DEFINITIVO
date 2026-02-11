@@ -47,4 +47,13 @@ public class Menus {
         System.out.println("Introduce [titulo | categoria | año] para editar dicho campo");
         System.out.print("o escribe [salir] para salir: ");
     }
+    public static void opcionesOrdenacion() {
+        System.out.println("\n--- FUNCIONES DE ORDENACIÓN ---");
+        System.out.println("1: Mostrar por categoría ordenado por año");
+        System.out.println("2: Mostrar títulos ordenados alfabéticamente");
+        System.out.println("3: Mostrar por plataforma");
+        System.out.println("4: Comprobar si existe un título");
+        System.out.println("5: Atrás");
+        System.out.print("Elige una opción: ");
+    }
 }
