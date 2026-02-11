@@ -1,7 +1,9 @@
 package arquitectura.App;
 
 import arquitectura.conexion.Database;
+import arquitectura.dominio.InicializadorPlataforma;
 import arquitectura.dominio.Persona;
+import arquitectura.dominio.Plataforma;
 import arquitectura.repositorio.*;
 
 import java.sql.SQLException;
@@ -20,6 +22,8 @@ public class Main {
         RepositorioPersona repoPersona = new RepositorioPersona();
         RepositorioVideojuego repoVideojuego = new RepositorioVideojuego();
         RepositorioPlataforma repoPlataforma = new RepositorioPlataforma();
+
+        InicializadorPlataforma.inicializar();
 
         // Login
         Persona personaActiva = RepositorioPersona.login(repoPersona);
